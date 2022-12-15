@@ -5,9 +5,9 @@ class TechnicalData:
         self.priceData:pd.DataFrame = rawFile
         self.symbol:str = rawFile.index[0][0]
         
-    @staticmethod
-    def create(rawFile:pd.DataFrame) -> TechnicalData:
-        return TechnicalData(rawFile)
+    @classmethod
+    def create(cls, rawFile:pd.DataFrame):
+        return cls(rawFile)
     
     @staticmethod
     def _isFileValid(rawFile:pd.DataFrame) -> bool:

@@ -1,10 +1,11 @@
 from PairTrading.lib.dataEngine import AlpacaDataClient, EodDataClient
 from PairTrading.authentication.authLoader import getAuth
 from PairTrading.authentication.base import BaseAuth
-from PairTrading.data import FundamentalsData
+from PairTrading.data import FundamentalsData, TechnicalData
 from PairTrading.util.write import writeToJson
 
 import json
+import pandas as pd
 
 
 if __name__ == "__main__":
@@ -21,14 +22,15 @@ if __name__ == "__main__":
     
 
     fData = eodClient.getFundamentals("AAPL")
-    
+    price = alpacaClient.getMonthly("AAPL")
     bars = alpacaClient.getAllBars("AAPL")
     
     fundamentals = FundamentalsData.create(fData)
     fundamentals.setTechnicalBars(bars)
     
-    metrics = fundamentals.getFundamentals()
-    
-    print(metrics)
+    technicalMetrics = TechnicalData.create(price).getMomentums()  
+    fundamentalMetrics = fundamentals.getFundamentals()
 
+    
+    print(pd.concat([technicalMetrics, fundamentalMetrics]))
     
