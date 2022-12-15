@@ -2,7 +2,7 @@
 
 def getFirstNonNullIndex(arr:list, featureName:str, initIndex:int=0, duration:int=4) -> int:
     for i in range(initIndex, initIndex+duration):
-        if arr[i][feature1Name]:
+        if arr[i][featureName]:
             return i 
         
     return -1

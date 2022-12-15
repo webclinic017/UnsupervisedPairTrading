@@ -6,6 +6,9 @@ import numpy as np
 import statsmodels.api as sm
 from overrides import override
 
+import warnings
+warnings.filterwarnings("ignore")
+
 class FirmCharGetter(FundamentalsBase):
 
     def __init__(self, rawFile:dict):
@@ -104,14 +107,14 @@ class FirmCharGetter(FundamentalsBase):
             feature1Name="longTermDebt", 
             feature2Name="totalAssets"
         )
-        longTermDebt:float = self.balanceSheet[iDebt]["longTermDebt"]
-        totalAsset:float = self.balanceSheet[iDebt]["totalAssets"]
+        longTermDebt:float = float(self.balanceSheet[iDebt]["longTermDebt"])
+        totalAsset:float = float(self.balanceSheet[iDebt]["totalAssets"])
         
         iCash:int = getFirstNonNullIndex(
             arr=self.balanceSheet, 
             featureName="cash"
         )
-        cashEquivalents:float = self.balanceSheet[iCash]["cash"]
+        cashEquivalents:float = float(self.balanceSheet[iCash]["cash"])
         
         return (marketCap + longTermDebt - totalAsset) / cashEquivalents
         
@@ -443,7 +446,7 @@ class FirmCharGetter(FundamentalsBase):
             dolvol -- Dollar trading volume:
             Natural log of trading volume times price per share from month t-2.
         """
-        if not self.monthlyBar:
+        if self.monthlyBar.empty:
             raise ValueError("the monthly bar variable is empty")
         
         return np.log(self.monthlyBar.iloc[-2]["volume"] * self.monthlyBar.iloc[-2]["close"])
@@ -599,7 +602,7 @@ class FirmCharGetter(FundamentalsBase):
             maxret -- Maximum daily return:
             Maximum daily return from returns during calendar month t-1.
         """
-        if not self.dailyBar:
+        if self.dailyBar.empty:
             raise ValueError("the daily bar variable is empty")
         
         dailyReturn:pd.DataFrame = (self.dailyBar["close"] - self.dailyBar["open"]) / self.dailyBar["open"]
@@ -977,7 +980,7 @@ class FirmCharGetter(FundamentalsBase):
             std_turn -- Volatility of liquidity (share turnover):
             Monthly standard deviation of daily share turnover
         """
-        if not self.dailyBar:
+        if self.dailyBar.empty:
             raise ValueError("the daily bar variable is empty")
         iShare:int = getFirstNonNullIndex(
             arr=self.balanceSheet,
@@ -1027,7 +1030,7 @@ class FirmCharGetter(FundamentalsBase):
             std_dolvol -- Volatility of liquidity (dollar trading volume):
             Monthly standard deviation of daily dollar trading volume
         """
-        if not self.dailyBar:
+        if self.dailyBar.empty:
             raise ValueError("the daily bar variable is empty")
         
         return (self.dailyBar["volume"] * self.dailyBar["vwap"]).std()
@@ -1038,7 +1041,7 @@ class FirmCharGetter(FundamentalsBase):
             Standard deviation of residuals of weekly returns on weekly equal weighted market returns for 3 years 
             prior to month end
         """
-        if not self.weeklyBar:
+        if self.weeklyBar.empty:
             raise ValueError("the weekly bar variable is empty")
         
         weeklyBar:pd.DataFrame = self.weeklyBar
@@ -1056,7 +1059,7 @@ class FirmCharGetter(FundamentalsBase):
             ill -- Illiquidity:
             Average of daily (absolute return / dollar volume)
         """
-        if not self.dailyBar:
+        if self.dailyBar.empty:
             raise ValueError("the daily bar variable is empty")
         
         return (self.dailyBar["close"] - self.dailyBar["open"] / self.dailyBar["vwap"]).mean()

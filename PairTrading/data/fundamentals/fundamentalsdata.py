@@ -33,18 +33,17 @@ class FundamentalsData:
         getList:list = [method for method in dir(self.firmCharacteristics) if method.startswith("get")]
         
         for getMethod in getList:
-            fundamentalsDict[getMethod.split("get")[1]] = getattr(self.firmCharacteristics, getMethod)
+            fundamentalsDict[getMethod.split("get")[1].lower()] = getattr(self.firmCharacteristics, getMethod)()
             
         return Series(fundamentalsDict)
     
     @staticmethod
     def _isFileValid(rawFile:dict) -> bool:
-        return 
-        ("Highlights" in rawFile.keys() and 
+        return ("Highlights" in rawFile.keys() and 
         "Technicals" in rawFile.keys() and 
-        "ShareStats" in rawFile.keys() and
+        "SharesStats" in rawFile.keys() and
         "Financials" in rawFile.keys() and
-        rawFile["Technicals"]["beta"] and 
+        rawFile["Technicals"]["Beta"] and 
         rawFile["Highlights"]["EarningsShare"] and
         len(rawFile["Financials"]["Income_Statement"]["quarterly"].values()) >= 13 and 
         len(rawFile["Financials"]["Balance_Sheet"]["quarterly"].values()) >= 13 and 
