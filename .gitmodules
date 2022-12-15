@@ -1,0 +1,3 @@
+[submodule "credentials"]
+	path = credentials
+	url = https://github.com/HaoxuanXu/TradingCredentials
