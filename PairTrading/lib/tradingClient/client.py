@@ -31,6 +31,7 @@ class AlpacaTradingClient:
         validAssets:list = [asset.symbol for asset in allAssets if (asset.fractionable==True and \
                                             asset.shortable==True and \
                                             asset.easy_to_borrow==True and \
-                                            asset.exchange in (AssetExchange.NYSE, AssetExchange.AMEX, AssetExchange.NASDAQ))]
+                                            asset.exchange in (AssetExchange.NYSE, AssetExchange.AMEX, AssetExchange.NASDAQ) and \
+                                            "." not in asset.symbol)]
         
         return validAssets

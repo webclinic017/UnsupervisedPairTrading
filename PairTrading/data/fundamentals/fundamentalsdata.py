@@ -32,8 +32,11 @@ class FundamentalsData:
         
         getList:list = [method for method in dir(self.firmCharacteristics) if method.startswith("get")]
         
-        for getMethod in getList:
-            fundamentalsDict[getMethod.split("get")[1].lower()] = getattr(self.firmCharacteristics, getMethod)()
+        try:
+            for getMethod in getList:
+                fundamentalsDict[getMethod.split("get")[1].lower()] = getattr(self.firmCharacteristics, getMethod)()
+        except Exception as ex:
+            raise Exception(ex)
             
         return Series(fundamentalsDict)
     

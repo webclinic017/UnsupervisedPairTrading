@@ -1,12 +1,11 @@
-from PairTrading.lib.dataEngine import AlpacaDataClient, EodDataClient
+from PairTrading import FeatureGenerator
+from PairTrading.lib.tradingClient import AlpacaTradingClient
 from PairTrading.authentication.authLoader import getAuth
 from PairTrading.authentication.base import BaseAuth
-from PairTrading.data import FundamentalsData, TechnicalData
-from PairTrading.lib.tradingClient import AlpacaTradingClient
-from PairTrading.util.write import writeToJson
+
 
 import json
-import pandas as pd
+from pandas import DataFrame
 
 
 if __name__ == "__main__":
@@ -17,11 +16,17 @@ if __name__ == "__main__":
     
     print(alpacaAuth)
     print(eodAuth)
-
-    alpacaClient:AlpacaDataClient = AlpacaDataClient.create(alpacaAuth)
-    eodClient:EodDataClient = EodDataClient.create(eodAuth)
     
     tradingClient:AlpacaTradingClient = AlpacaTradingClient.create(alpacaAuth)
+    stockList:list = tradingClient.getViableStocks()
+
+    generator:FeatureGenerator = FeatureGenerator(alpacaAuth, eodAuth, stockList)
     
-    assets = tradingClient.getViableStocks()
-    print(assets)
+    trainingData:DataFrame = generator.getFeatureData(
+        useExistingFiles=True,
+        writeToFile=True,
+        cleanOldData=True
+    )
+    
+    trainingData.to_csv("training.csv")
+    

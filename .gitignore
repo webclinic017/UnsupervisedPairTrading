@@ -1,6 +1,6 @@
 .ipynb_checkpoints/
 Env/
-
+tmp/
 **/__pycache__/
 *.ipynb
 *.csv

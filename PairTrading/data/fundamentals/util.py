@@ -5,21 +5,21 @@ def getFirstNonNullIndex(arr:list, featureName:str, initIndex:int=0, duration:in
         if arr[i][featureName]:
             return i 
         
-    return -1
+    raise Exception("No valid index")
 
 def getFirstNonNullIndexPair(arr1, arr2:list, feature1Name, feature2Name:str, initIndex:int=0, duration:int=4) -> int:
     for i in range(initIndex, initIndex+duration):
         if arr1[i][feature1Name] and arr2[i][feature2Name]:
             return i 
         
-    return -1
+    raise Exception("No valid index pairs")
 
 def getFirstNonNullIndexPairDistance(arr1, arr2:list, feature1Name, feature2Name:str, initIndex:int=0, distance:int=4) -> (int, int):
     for i in range(len(arr1) - distance):
         if arr1[i][feature1Name] and arr2[i+distance][feature2Name]:
             return (i, i+distance)
         
-        return (-1, -1)
+    raise Exception("No valid index pairs")
 
 def getNonNullIndexRange(arr:list, featureName:str,initIndex:int=0, duration:int=4) -> list[int]:
     res:list = []
@@ -29,6 +29,8 @@ def getNonNullIndexRange(arr:list, featureName:str,initIndex:int=0, duration:int
             res.append(i)
         i += 1
         
+    if not res:
+        raise Exception("No valid index range")
     return res
 
 def getNonNullIndexRangePair(arr1, arr2:list, feature1Name, feature2Name:str, initIndex:int=0, duration:int=4) -> list[int]:
@@ -39,4 +41,7 @@ def getNonNullIndexRangePair(arr1, arr2:list, feature1Name, feature2Name:str, in
             res.append(i)
         i += 1
         
+    if len(res) < duration:
+        raise Exception("No valid index pairs")
+    
     return res
