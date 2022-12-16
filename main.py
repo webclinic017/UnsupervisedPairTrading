@@ -2,6 +2,7 @@ from PairTrading.lib.dataEngine import AlpacaDataClient, EodDataClient
 from PairTrading.authentication.authLoader import getAuth
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.data import FundamentalsData, TechnicalData
+from PairTrading.lib.tradingClient import AlpacaTradingClient
 from PairTrading.util.write import writeToJson
 
 import json
@@ -20,17 +21,7 @@ if __name__ == "__main__":
     alpacaClient:AlpacaDataClient = AlpacaDataClient.create(alpacaAuth)
     eodClient:EodDataClient = EodDataClient.create(eodAuth)
     
-
-    fData = eodClient.getFundamentals("AAPL")
-    price = alpacaClient.getMonthly("AAPL")
-    bars = alpacaClient.getAllBars("AAPL")
+    tradingClient:AlpacaTradingClient = AlpacaTradingClient.create(alpacaAuth)
     
-    fundamentals = FundamentalsData.create(fData)
-    fundamentals.setTechnicalBars(bars)
-    
-    technicalMetrics = TechnicalData.create(price).getMomentums()  
-    fundamentalMetrics = fundamentals.getFundamentals()
-
-    
-    print(pd.concat([technicalMetrics, fundamentalMetrics]))
-    
+    assets = tradingClient.getViableStocks()
+    print(assets)

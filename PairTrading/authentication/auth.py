@@ -3,22 +3,24 @@ from PairTrading.authentication.enums import ConfigType
 from overrides import override
 
 class AlpacaAuth(BaseAuth):
-    def __init__(self, api_key, secret_key:str):
+    def __init__(self, api_key, secret_key:str, isPaper:bool=True):
+        super().__init__(api_key, secret_key)
         self.configType = ConfigType.ALPACA
-        self.api_key:str = api_key
-        self.secret_key:str = secret_key 
+        self.isPaper:bool = isPaper
         
     @classmethod
     @override
-    def create(cls, rawDict, isLive:bool):
-        if isLive:
-            return cls(
-                api_key=rawDict["live"]["api_key"],
-                secret_key=rawDict["live"]["secret_key"])
-        else:
+    def create(cls, rawDict, isPaper:bool):
+        if isPaper:
             return cls(
                 api_key=rawDict["paper"]["api_key"],
-                secret_key=rawDict["paper"]["secret_key"])
+                secret_key=rawDict["paper"]["secret_key"],
+                isPaper=True)
+        else:
+            return cls(
+                api_key=rawDict["live"]["api_key"],
+                secret_key=rawDict["live"]["secret_key"],
+                isPaper=False)
         
     @override
     def __str__(self):
@@ -31,12 +33,12 @@ class AlpacaAuth(BaseAuth):
         
 class EodAuth(BaseAuth):
     def __init__(self, api_key:str):
+        super().__init__(api_key, None)
         self.configType = ConfigType.EOD
-        self.api_key:str = api_key
         
     @classmethod
     @override
-    def create(cls, rawDict, isLive=False):
+    def create(cls, rawDict, isPaper=True):
         return cls(
             api_key=rawDict["api_key"])
         
