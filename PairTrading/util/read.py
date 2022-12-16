@@ -1,4 +1,4 @@
-import orjson as json 
+import json 
 
 def readFromJson(filePath:str) -> dict:
     

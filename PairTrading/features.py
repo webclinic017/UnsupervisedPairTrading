@@ -10,11 +10,12 @@ from pandas import DataFrame, Series, concat
 import json 
 import os
 import shutil
+import numpy as np
 
 from tqdm import tqdm
 import warnings
 
-warnings.filterwarnings("ignore")
+
 
 
 class FeatureGenerator:
@@ -41,18 +42,22 @@ class FeatureGenerator:
     
     def getFeatureData(self, useExistingFiles:bool=False, writeToFile:bool=True, cleanOldData:bool=False) -> DataFrame:
         res:DataFrame = DataFrame()
-        storedStockList = os.listdir("tmp") if os.path.exists("tmp") else []
+        storedStockList = os.listdir("saveddata/tmp") if os.path.exists("saveddata/tmp") else []
         
         if cleanOldData and not useExistingFiles:
-            if os.path.exists("tmp"):
-                shutil.rmtree("tmp")
+            if os.path.exists("saveddata/tmp"):
+                shutil.rmtree("saveddata/tmp")
                 
         
         for stock in tqdm(self.stocks):
             priceData:DataFrame = self.alpacaClient.getMonthly(stock)
             
+            # we will not consider stocks that have less than 4 years of data
+            if priceData.shape[0] < 49:
+                continue
+            
             if useExistingFiles and f"{stock}.json" in storedStockList:
-                fundamentals:dict = readFromJson(f"tmp/{stock}.json")
+                fundamentals:dict = readFromJson(f"saveddata/tmp/{stock}.json")
             else:
                 fundamentals:dict = self.eodClient.getFundamentals(stock)
                        
@@ -69,13 +74,14 @@ class FeatureGenerator:
                 res = combinedFeatures if res.empty else concat([res, combinedFeatures])
                 
                 if writeToFile and f"{stock}.json" not in storedStockList:
-                    if not os.path.exists("tmp"):
-                        os.makedirs("tmp")
-                    writeToJson(fundamentals, f"tmp/{stock}.json")
-            
+                    if not os.path.exists("saveddata/tmp"):
+                        os.makedirs("saveddata/tmp")
+                    writeToJson(fundamentals, f"saveddata/tmp/{stock}.json")           
             except:
                 continue
         
+        res.replace([np.inf, -np.inf], np.nan, inplace=True)
+        res.fillna(0)
         return res
             
             

@@ -1,4 +1,4 @@
-import orjson as json 
+import json 
 
 def writeToJson(data:dict, filePath:str) -> bool:
     

@@ -6,7 +6,7 @@ from sklearn.cluster import AgglomerativeClustering
 from pandas import DataFrame
 import numpy as np
 
-class AgglomerativeClustering:
+class Clustering:
     def __init__(self, inputData:DataFrame):
         self.inputData:DataFrame = inputData
         self.dataPipeline:Pipeline = Pipeline([
@@ -24,7 +24,10 @@ class AgglomerativeClustering:
     
     def _train_predict(self, scaledData:DataFrame) -> DataFrame:
         predictionNP:np.array = self.trainingPipeline.fit_predict(scaledData)
-        return DataFrame(predictionNP, index=scaledData.index, columns=["cluster_id"])
+        res = DataFrame(predictionNP, index=scaledData.index, columns=["cluster_id"])
+        res["momentum"] = self.inputData["m47"]
+        
+        return res
     
     def run(self) -> DataFrame:
         return self._train_predict(
