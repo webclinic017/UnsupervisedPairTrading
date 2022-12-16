@@ -12,6 +12,9 @@ import os
 import shutil
 
 from tqdm import tqdm
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 class FeatureGenerator:
@@ -65,7 +68,7 @@ class FeatureGenerator:
                 combinedFeatures = DataFrame([momentums.append(firmChars).rename(stock)])
                 res = combinedFeatures if res.empty else concat([res, combinedFeatures])
                 
-                if writeToFile:
+                if writeToFile and f"{stock}.json" not in storedStockList:
                     if not os.path.exists("tmp"):
                         os.makedirs("tmp")
                     writeToJson(fundamentals, f"tmp/{stock}.json")

@@ -1,10 +1,11 @@
-import json 
+import orjson as json 
 
 def readFromJson(filePath:str) -> dict:
     
     try:
         with open(filePath, "r") as inFile:
-            return json.load(inFile)
+            jsonStr = inFile.read()
+            return json.loads(jsonStr)
             
     except Exception as ex:
         print(ex)
