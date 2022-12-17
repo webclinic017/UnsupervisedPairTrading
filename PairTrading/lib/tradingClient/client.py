@@ -4,7 +4,7 @@ from PairTrading.authentication.enums import ConfigType
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce
 from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest
-from alpaca.trading.models import Order, Position
+from alpaca.trading.models import Order, Position, TradeAccount
 
 
 class AlpacaTradingClient:
@@ -37,12 +37,23 @@ class AlpacaTradingClient:
         
         return validAssets
     
-    def openPositions(self, stockPair:list, notional:float) -> list[Order, Order]:
+    def getAccountDetail(self) -> TradeAccount:
+        return self.client.get_account()
+    
+    def getAllOpenPositions(self) -> dict[str][Position]:        
+        openPositions:list[Position] = self.client.get_all_positions()
+        res:dict[str][Position] = {position.symbol:position for position in openPositions}
+        return res
+    
+    def openPositions(self, stockPair:tuple, notional:float) -> tuple[Order, Order]:
+        
+        if notional <= 2:
+            raise ValueError("You cannot trade for less than 1 dollars")
         
         # short the first stock
         shortOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
             symbol=stockPair[0],
-            notional=notional,
+            notional=notional/2,
             side=OrderSide.SELL,
             time_in_force=TimeInForce.DAY            
         ))
@@ -50,14 +61,14 @@ class AlpacaTradingClient:
         # long the second stock
         longOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
             symbol=stockPair[1],
-            notional=notional,
+            notional=notional/2,
             side=OrderSide.BUY,
             time_in_force=TimeInForce.DAY            
         ))
         
-        return [shortOrder, longOrder]
+        return (shortOrder, longOrder)
     
-    def closePositions(self, stockPair:list) -> list[Order, Order]:
+    def closePositions(self, stockPair:tuple) -> tuple[Order, Order]:
         
         # closed short position
         closedShortOrder:Order = self.client.close_position(stockPair[0])
@@ -65,4 +76,4 @@ class AlpacaTradingClient:
         # closed long position
         closedLongOrder:Order = self.client.close_position(stockPair[1])
         
-        return [closedShortOrder, closedLongOrder]
+        return (closedShortOrder, closedLongOrder)

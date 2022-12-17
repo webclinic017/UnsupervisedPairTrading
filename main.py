@@ -51,7 +51,7 @@ if __name__ == "__main__":
     res = pairCreator.getFinalPairs()
     print(res)
     
-    writeToJson(res, "saveddata/pairs.json")
+    writeToJson(res, "saveddata/pairs/pairs.json")
     
  
     
