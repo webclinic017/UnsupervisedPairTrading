@@ -21,24 +21,24 @@ if __name__ == "__main__":
     
     # # get authentication object
     alpacaAuth:BaseAuth = getAuth("alpaca")
-    # eodAuth:BaseAuth = getAuth("eod")
+    eodAuth:BaseAuth = getAuth("eod")
     
     # print(alpacaAuth)
     # print(eodAuth)
     
-    # tradingClient:AlpacaTradingClient = AlpacaTradingClient.create(alpacaAuth)
+    tradingClient:AlpacaTradingClient = AlpacaTradingClient.create(alpacaAuth)
     dataClient:AlpacaDataClient = AlpacaDataClient.create(alpacaAuth)
-    # stockList:list = tradingClient.getViableStocks()
+    stockList:list = tradingClient.getViableStocks()
 
-    # generator:FeatureGenerator = FeatureGenerator(alpacaAuth, eodAuth, stockList)
+    generator:FeatureGenerator = FeatureGenerator(alpacaAuth, eodAuth, stockList)
     
-    # trainingData:DataFrame = generator.getFeatureData(
-    #     useExistingFiles=True,
-    #     writeToFile=True,
-    #     cleanOldData=False
-    # )
+    trainingData:DataFrame = generator.getFeatureData(
+        useExistingFiles=True,
+        writeToFile=True,
+        cleanOldData=False
+    )
     
-    # trainingData.to_csv("saveddata/training.csv")
+    trainingData.to_csv("saveddata/training.csv")
     trainingData = read_csv("saveddata/training.csv", index_col=0)
     trainingData.fillna(trainingData.mean(), inplace=True)
     
