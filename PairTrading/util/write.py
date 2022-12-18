@@ -13,11 +13,12 @@ def writeToJson(data:dict, filePath:str) -> bool:
         print(ex)
         return False
         
-def dumpTradingRecord(record:dict[tuple, date]) -> None:
-    for pair, submitTime in record.items():
-        record[",".join([pair[0], pair[1]])] = submitTime.strftime("%Y-%m-%d")
+def dumpTradingRecord(record:dict[tuple, float]) -> None:
+    res:dict[str, float] = {}
+    for pair, meanRatio in record.items():
+        res[",".join([pair[0], pair[1]])] = meanRatio
         
-    writeToJson(record, "saveddata/pairs/pairs.json")
+    writeToJson(res, "saveddata/openedpairs.json")
     
 def dumpRecentlyClosed(recentlyClosed:dict[str, date]) -> None:
     for symbol, submitTime in recentlyClosed.items():

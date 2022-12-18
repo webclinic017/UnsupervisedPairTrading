@@ -4,10 +4,10 @@ from PairTrading.util.read import getRecentlyClosed
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce
-from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest
-from alpaca.trading.models import Order, Position, TradeAccount, Asset
+from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest, GetOrdersRequest
+from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
 
-from datetime import date
+from datetime import date, datetime, timezone
 
 class AlpacaTradingClient:
     # the trading client implements the singleton pattern
@@ -29,6 +29,14 @@ class AlpacaTradingClient:
         if alpacaAuth.configType != ConfigType.ALPACA:
             raise AttributeError("the auth object is not for Alpaca client")
         return cls(auth=alpacaAuth)
+    
+    def getTimeTillMarketOpensInSeconds(self) -> float:
+        clock:Clock = self.client.get_clock()
+        
+        if clock.is_open:
+            return 0
+        
+        return (clock.next_open.replace(tzinfo=None) - datetime.now()).total_seconds()
     
     def getViableStocks(self) -> list[str]:
         
@@ -55,6 +63,13 @@ class AlpacaTradingClient:
         openPositions:list[Position] = self.client.get_all_positions()
         res:dict[str, Position] = {position.symbol:position for position in openPositions}
         return res
+    
+    def getPairOrders(self, pairSymbols:tuple) -> list[Order]:
+        return self.client.get_orders(
+            GetOrdersRequest(
+                symbols=list(pairSymbols)
+            )
+        )
     
     def openPositions(self, stockPair:tuple, notional:float) -> tuple[Order, Order]:
         

@@ -7,6 +7,11 @@ from pandas import DataFrame
 import numpy as np
 
 class Clustering:
+    _instance = None 
+    def __new__(cls, inputData:DataFrame):
+        if not cls._instance:
+            cls._instance = super(Clustering, cls).__new__(Clustering)
+        return cls._instance
     def __init__(self, inputData:DataFrame):
         self.inputData:DataFrame = inputData
         self.dataPipeline:Pipeline = Pipeline([

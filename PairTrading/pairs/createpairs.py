@@ -1,6 +1,7 @@
 from pandas import DataFrame, Series
 from numpy import array
 from sklearn.preprocessing import StandardScaler
+from datetime import date
 
 from PairTrading.lib.dataEngine import AlpacaDataClient
 
@@ -9,7 +10,7 @@ class PairCreator:
     # pair creator implements the singleton pattern
     def __new__(cls, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         if cls._instance is None:
-            cls._instance = super(PairCreator, cls).__new__(cls)
+            cls._instance = super(PairCreator, cls).__new__(PairCreator)
         return cls._instance
     
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
@@ -22,6 +23,8 @@ class PairCreator:
     
     def getFinalPairs(self) -> dict[str, list]:
         res:dict = {}
+        res["time"] = date.today().strftime("%Y-%m-%d")
+        finalPairs:dict = {}
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in self._getTradeablePairs().index]
         
         for pair1, pair2 in viablePairs:
@@ -31,8 +34,8 @@ class PairCreator:
             priceRatio:array = pair1DailyDF/ pair2DailyDF
             
             if (priceRatio[-1] - priceRatio.mean()) / priceRatio.std() > 0:
-                res[",".join([pair1, pair2])] = (priceRatio[-1], priceRatio.mean())
-                
+                finalPairs[",".join([pair1, pair2])] = (priceRatio[-1], priceRatio.mean())
+        res["final_pairs"] = finalPairs 
         return res
     
     
