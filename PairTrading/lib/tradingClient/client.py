@@ -1,13 +1,22 @@
 from PairTrading.authentication import AlpacaAuth
 from PairTrading.authentication.enums import ConfigType
+from PairTrading.util.read import getRecentlyClosed
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce
 from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest
-from alpaca.trading.models import Order, Position, TradeAccount
+from alpaca.trading.models import Order, Position, TradeAccount, Asset
 
+from datetime import date
 
 class AlpacaTradingClient:
+    # the trading client implements the singleton pattern
+    _instance = None     
+    def __new__(cls, auth:AlpacaAuth):
+        if not cls._instance:
+            cls._instance = super(AlpacaTradingClient, cls).__new__(AlpacaTradingClient)
+        return cls._instance
+    
     def __init__(self, auth:AlpacaAuth):
         self.client:TradingClient = TradingClient(
             api_key=auth.api_key,
@@ -23,26 +32,28 @@ class AlpacaTradingClient:
     
     def getViableStocks(self) -> list[str]:
         
-        allAssets:list = self.client.get_all_assets(
+        allAssets:list[Asset] = self.client.get_all_assets(
             GetAssetsRequest(
                 status=AssetStatus.ACTIVE,
                 asset_class=AssetClass.US_EQUITY
             )
         )      
-        validAssets:list = [asset.symbol for asset in allAssets if (asset.fractionable==True and \
+        recentlyClosed:dict[str, date] = getRecentlyClosed() if getRecentlyClosed() else {}
+        validAssets:list[str] = [asset.symbol for asset in allAssets if (asset.fractionable==True and \
                                             asset.shortable==True and \
                                             asset.easy_to_borrow==True and \
                                             asset.exchange in (AssetExchange.NYSE, AssetExchange.AMEX, AssetExchange.NASDAQ) and \
-                                            "." not in asset.symbol)] 
+                                            "." not in asset.symbol and \
+                                            asset.symbol not in recentlyClosed)] 
         
         return validAssets
     
     def getAccountDetail(self) -> TradeAccount:
         return self.client.get_account()
     
-    def getAllOpenPositions(self) -> dict[str][Position]:        
+    def getAllOpenPositions(self) -> dict[str, Position]:        
         openPositions:list[Position] = self.client.get_all_positions()
-        res:dict[str][Position] = {position.symbol:position for position in openPositions}
+        res:dict[str, Position] = {position.symbol:position for position in openPositions}
         return res
     
     def openPositions(self, stockPair:tuple, notional:float) -> tuple[Order, Order]:

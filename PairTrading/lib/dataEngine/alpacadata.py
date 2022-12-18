@@ -2,6 +2,7 @@ from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
+from  PairTrading.authentication.auth import AlpacaAuth
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.lib.dataEngine.basedata import BaseDataClient
 from PairTrading.lib.dataEngine.common import BarCollection
@@ -9,25 +10,30 @@ from PairTrading.lib.dataEngine.common import BarCollection
 import pandas as pd 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from overrides import override
 
-class AlpacaDataClient(BaseDataClient):
-    def __init__(self, auth:BaseAuth):
+class AlpacaDataClient:
+    _instance = None
+    # the alpaca data client implements the singleton pattern
+    def __new__(cls, auth:AlpacaAuth):
+        if not cls._instance:
+            cls._instance = super(AlpacaDataClient, cls).__new__(AlpacaDataClient)
+        return cls._instance
+    
+    def __init__(self, auth:AlpacaAuth):
         self.dataClient:StockHistoricalDataClient = StockHistoricalDataClient(
             api_key=auth.api_key,
             secret_key=auth.secret_key
-        )
+        )   
+    
     @classmethod
-    @override
-    def create(cls, auth:BaseAuth):
+    def create(cls, auth:AlpacaAuth):
         if cls._isAuthValid(auth):
-            return cls(auth)
+            return cls(auth=auth)
         else:
             raise AttributeError("the auth object is invalid")
     
     @staticmethod
-    @override
-    def _isAuthValid(auth:BaseAuth) -> bool:
+    def _isAuthValid(auth:AlpacaAuth) -> bool:
         if auth.api_key and auth.secret_key:
             return True 
         return False 

@@ -5,6 +5,13 @@ from sklearn.preprocessing import StandardScaler
 from PairTrading.lib.dataEngine import AlpacaDataClient
 
 class PairCreator:
+    _instance = None 
+    # pair creator implements the singleton pattern
+    def __new__(cls, clusterDF:DataFrame, dataClient:AlpacaDataClient):
+        if cls._instance is None:
+            cls._instance = super(PairCreator, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         self.clusterDF:DataFrame = clusterDF
         self.dataClient:AlpacaDataClient = dataClient
@@ -13,7 +20,7 @@ class PairCreator:
     def create(cls, clusterDF:DataFrame, client:AlpacaDataClient):
         return cls(clusterDF, client)
     
-    def getFinalPairs(self) -> list:
+    def getFinalPairs(self) -> dict[str, list]:
         res:dict = {}
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in self._getTradeablePairs().index]
         

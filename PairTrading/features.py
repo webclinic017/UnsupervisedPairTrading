@@ -19,6 +19,18 @@ import warnings
 
 
 class FeatureGenerator:
+    _instance = None 
+    # feature generator implements the singleton pattern
+    def __new__(
+        cls,
+        alpacaAuth:AlpacaAuth, 
+        eodAuth:EodAuth,
+        stocks:list
+    ):
+        if cls._instance is None:
+            cls._instance = super(FeatureGenerator, cls).__new__(FeatureGenerator)
+        return cls._instance
+    
     def __init__(
         self,
         alpacaAuth:AlpacaAuth, 
@@ -81,7 +93,7 @@ class FeatureGenerator:
                 continue
         
         res.replace([np.inf, -np.inf], np.nan, inplace=True)
-        res.fillna(0)
+        res.fillna(0, inplace=True)
         return res
             
             
