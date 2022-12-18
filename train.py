@@ -17,7 +17,7 @@ import numpy as np
 
 warnings.filterwarnings("ignore")
 
-def getTrainAssign(alpacaAuth, eodAuth:BaseAuth):
+def getTrainAssign(alpacaAuth, eodAuth:BaseAuth) -> None:
     
     # create trading and data clients
     dataClient:AlpacaDataClient = AlpacaDataClient.create(alpacaAuth)
@@ -27,7 +27,7 @@ def getTrainAssign(alpacaAuth, eodAuth:BaseAuth):
     # generate technical and fundamental features
     generator:FeatureGenerator = FeatureGenerator.create(alpacaAuth, eodAuth, stockList)
     trainingData:DataFrame = generator.getFeatureData(
-        useExistingFiles=False,
+        useExistingFiles=True,
         writeToFile=True,
         cleanOldData=True
     )
@@ -45,6 +45,7 @@ def getTrainAssign(alpacaAuth, eodAuth:BaseAuth):
     print(res)
     
     writeToJson(res, "saveddata/pairs/pairs.json")
+
     
  
     

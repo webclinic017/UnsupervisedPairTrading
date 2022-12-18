@@ -61,7 +61,7 @@ class FeatureGenerator:
                 shutil.rmtree("saveddata/tmp")
                 
         
-        for stock in tqdm(self.stocks):
+        for stock in tqdm(self.stocks, desc="calculate technical and fundamental features"):
             priceData:DataFrame = self.alpacaClient.getMonthly(stock)
             
             # we will not consider stocks that have less than 4 years of data

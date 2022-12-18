@@ -38,6 +38,7 @@ class AlpacaTradingClient:
         
         return (clock.next_open.replace(tzinfo=None) - datetime.now()).total_seconds()
     
+    
     def getViableStocks(self) -> list[str]:
         
         allAssets:list[Asset] = self.client.get_all_assets(

@@ -55,7 +55,6 @@ class TradingManager:
             openedPositions=currOpenedPositions
         )
         if not tradingPairs:
-            print("no viable trading pairs...")
             return
        
         availableCash:float = float(self.tradingClient.getAccountDetail().cash) * self.entryPercent

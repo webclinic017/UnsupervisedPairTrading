@@ -11,6 +11,7 @@ from tqdm import tqdm
 import time
 
 ENTRY_PERCENT = 0.1
+REFRESH_DATA = True
 
 if __name__ == "__main__":
         
@@ -21,13 +22,13 @@ if __name__ == "__main__":
     alpacaAuth:AlpacaAuth = getAuth("alpaca")
     eodAuth:EodAuth = getAuth("eod")
     # get recently trained final pairs data 
-    pairsDict = getPairsFromTrainingJson()
+    pairsDict:dict = getPairsFromTrainingJson()
     
-    print(pairsDict)
-    
-    if (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days > 31:
-        print("pairs data past 31 days -- new training needs to be conducted")
-        getTrainAssign() 
+    thirtyDaysElapsed:bool = (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days > 30
+    if (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days > 30 or REFRESH_DATA:
+        reason:str = "30 days elapsed" if thirtyDaysElapsed else "manual decision for new training"
+        print(f"new training needs to be conducted -- {reason}")
+        getTrainAssign(alpacaAuth, eodAuth) 
         
     # create the authen
     # initialize trading manager
