@@ -30,13 +30,18 @@ class AlpacaTradingClient:
             raise AttributeError("the auth object is not for Alpaca client")
         return cls(auth=alpacaAuth)
     
-    def getTimeTillMarketOpensInSeconds(self) -> float:
-        clock:Clock = self.client.get_clock()
+    @property
+    def clock(self) -> Clock:
+        return self.client.get_clock()
+    
+    @property
+    def secondsTillMarketOpens(self) -> int:
+        clock:Clock = self.clock
         
         if clock.is_open:
             return 0
         
-        return (clock.next_open.replace(tzinfo=None) - datetime.now()).total_seconds()
+        return int((clock.next_open.replace(tzinfo=None) - datetime.now()).total_seconds())
     
     
     def getViableStocks(self) -> list[str]:
@@ -57,10 +62,12 @@ class AlpacaTradingClient:
         
         return validAssets
     
-    def getAccountDetail(self) -> TradeAccount:
+    @property
+    def accountDetail(self) -> TradeAccount:
         return self.client.get_account()
     
-    def getAllOpenPositions(self) -> dict[str, Position]:        
+    @property
+    def openedPositions(self) -> dict[str, Position]:        
         openPositions:list[Position] = self.client.get_all_positions()
         res:dict[str, Position] = {position.symbol:position for position in openPositions}
         return res

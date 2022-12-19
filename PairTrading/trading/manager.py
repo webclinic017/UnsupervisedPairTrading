@@ -15,7 +15,6 @@ class TradingManager:
         return cls._instance 
     
     def __init__(self, tradingClient:AlpacaTradingClient, entryPercent:float):
-        self.tradingPairs:dict[tuple, list] = getPairsFromTrainingJson()["final_pairs"]
         self.tradingClient:AlpacaTradingClient = tradingClient
         self.entryPercent:float = 0    
         
@@ -26,7 +25,10 @@ class TradingManager:
             tradingClient=tradingClient,
             entryPercent=entryPercent
         )
-        
+    
+    @property
+    def tradingPairs(self) -> dict[tuple, list]:
+        getPairsFromTrainingJson()["final_pairs"]
     
     def _filterExistingPairPositions(self, pairs:dict[tuple, list], openedPositions:dict[str, Position]) -> dict[tuple, list]:
         if not pairs:
@@ -49,7 +51,7 @@ class TradingManager:
     
     def openPositions(self) -> None:
         
-        currOpenedPositions:dict[str, Position] = self.tradingClient.getAllOpenPositions()
+        currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions
         tradingPairs:dict[tuple, list] = self._filterExistingPairPositions(
             pairs=self.tradingPairs,
             openedPositions=currOpenedPositions
@@ -57,7 +59,7 @@ class TradingManager:
         if not tradingPairs:
             return
        
-        availableCash:float = float(self.tradingClient.getAccountDetail().cash) * self.entryPercent
+        availableCash:float = float(self.tradingClient.accountDetail.cash) * self.entryPercent
         
         tradeNums:int = (availableCash//(float(currOpenedPositions.values()[0].cost_basis)*2)) if \
             currOpenedPositions and (availableCash//(float(currOpenedPositions.values()[0].cost_basis)*2)) <= len(tradingPairs) else len(tradingPairs)
