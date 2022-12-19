@@ -5,9 +5,10 @@ from PairTrading.util.read import getRecentlyClosed
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce
 from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest, GetOrdersRequest
-from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
+from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock, OrderStatus
 
 from datetime import date, datetime, timezone
+import time
 
 class AlpacaTradingClient:
     # the trading client implements the singleton pattern
@@ -73,34 +74,43 @@ class AlpacaTradingClient:
         return res
     
     def getPairOrders(self, pairSymbols:tuple) -> list[Order]:
+        self.client.get
         return self.client.get_orders(
             GetOrdersRequest(
+                status=OrderStatus.FILLED,
                 symbols=list(pairSymbols)
             )
         )
-    
-    def openPositions(self, stockPair:tuple, notional:float) -> tuple[Order, Order]:
         
-        if notional <= 2:
-            raise ValueError("You cannot trade for less than 1 dollars")
+    
+    
+    def openPositions(self, stockPair:tuple, shortQty:float) -> tuple[Order, Order]:
+        
+        if shortQty < 1:
+            raise ValueError("You cannot trade for less than 1 share")
         
         # short the first stock
         shortOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
             symbol=stockPair[0],
-            notional=notional/2,
+            qty=shortQty,
             side=OrderSide.SELL,
             time_in_force=TimeInForce.DAY            
         ))
         
+        time.sleep(1)
+        filledShortOrder:Order = self.client.get_order_by_id(shortOrder.id)
+        longNotional:float = float(filledShortOrder.filled_qty) * float(filledShortOrder.filled_avg_price)
+        
         # long the second stock
         longOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
             symbol=stockPair[1],
-            notional=notional/2,
+            notional=longNotional,
             side=OrderSide.BUY,
             time_in_force=TimeInForce.DAY            
         ))
-        
-        return (shortOrder, longOrder)
+        time.sleep(1)
+        filledLongOrder:Order = self.client.get_order_by_id(longOrder.id)
+        return (filledShortOrder, filledLongOrder)
     
     def closePositions(self, stockPair:tuple) -> tuple[Order, Order]:
         

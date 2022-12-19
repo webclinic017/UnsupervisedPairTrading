@@ -10,8 +10,8 @@ from datetime import datetime, date
 from tqdm import tqdm
 import time
 
-ENTRY_PERCENT = 0.1
-REFRESH_DATA = True
+ENTRY_PERCENT = 0.2
+REFRESH_DATA = False
 
 if __name__ == "__main__":
         
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     if thirtyDaysElapsed or REFRESH_DATA:
         reason:str = "30 days elapsed" if thirtyDaysElapsed else "manual decision for new training"
         print(f"new training needs to be conducted -- {reason}")
-        getTrainAssign(alpacaAuth, eodAuth) 
+        getTrainAssign(alpacaAuth, eodAuth, True) 
         
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)

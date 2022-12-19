@@ -36,7 +36,7 @@ class FundamentalsData:
             try:
                 fundamentalsDict[getMethod.split("get")[1].lower()] = getattr(self.firmCharacteristics, getMethod)()
             except Exception as ex:
-                continue
+                fundamentalsDict[getMethod.split("get")[1].lower()] = None
             
         return Series(fundamentalsDict)
     

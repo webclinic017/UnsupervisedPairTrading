@@ -31,7 +31,8 @@ def getTradingRecord() -> dict[tuple, float]:
     
 def getPairsFromTrainingJson() -> dict:
     if not os.path.exists("saveddata/pairs/pairs.json"):
-        raise FileNotFoundError("pairs.json file does not exist")
+        print("pairs.json file does not exist")
+        return {}
 
     pairs:dict = readFromJson("saveddata/pairs/pairs.json")
     pairs["final_pairs"]:dict = {(p.split(",")[0], p.split(",")[1]):val for p, val in pairs["final_pairs"].items()}

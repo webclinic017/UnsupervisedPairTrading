@@ -1,5 +1,6 @@
 from alpaca.data.historical import StockHistoricalDataClient
-from alpaca.data.requests import StockBarsRequest
+from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest
+from alpaca.data.models import Quote
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
 from  PairTrading.authentication.auth import AlpacaAuth
@@ -81,4 +82,12 @@ class AlpacaDataClient:
         monthly:pd.DataFrame = self.getMonthly(symbol)
         
         return BarCollection(daily, weekly, monthly)
+    
+    def getLatestQuote(self, symbol:str) -> Quote:
+        return self.dataClient.get_stock_latest_quote(
+            StockLatestQuoteRequest(
+                symbol_or_symbols=symbol,
+                feed=DataFeed.SIP
+            )
+        )[symbol]
         
