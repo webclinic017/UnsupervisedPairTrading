@@ -11,7 +11,7 @@ from tqdm import tqdm
 import time
 
 ENTRY_PERCENT = 0.2
-REFRESH_DATA = False
+REFRESH_DATA = True
 
 if __name__ == "__main__":
         
@@ -24,11 +24,11 @@ if __name__ == "__main__":
     # get recently trained final pairs data 
     pairsDict:dict = getPairsFromTrainingJson()
     
-    thirtyDaysElapsed:bool = (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days > 30
-    if thirtyDaysElapsed or REFRESH_DATA:
+    todayTrained:bool = (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days == 0
+    if (date.today().day==2 and not todayTrained) or REFRESH_DATA:
         reason:str = "30 days elapsed" if thirtyDaysElapsed else "manual decision for new training"
         print(f"new training needs to be conducted -- {reason}")
-        getTrainAssign(alpacaAuth, eodAuth, True) 
+        getTrainAssign(alpacaAuth, eodAuth, REFRESH_DATA) 
         
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)
@@ -45,4 +45,4 @@ if __name__ == "__main__":
     while manager.tradingClient.clock.is_open:
         manager.openPositions()
         manager.closePositions()
-        time.sleep(60*5) # sleep for 5 minutes
+        time.sleep(60*10) # sleep for 10 minutes

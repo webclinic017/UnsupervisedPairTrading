@@ -72,7 +72,37 @@ class TradingManager:
     
     def _getShortableQty(self, symbol:str, notionalAmount) -> float:
         latestBidPrice:float = self.dataClient.getLatestQuote(symbol).bid_price
-        return notionalAmount // latestBidPrice
+        rawQty:float = notionalAmount // latestBidPrice
+        offset:float = (rawQty % 100) if (rawQty % 100) >= 50 else 0
+        return ((rawQty // 100) * 100) + offset
+    
+    def _getViableTradesNum(self, entryAmount:float) -> int:
+        res:int = 0
+        for pair, _ in self.tradingPairs.items():
+            if self._getShortableQty(pair[0], entryAmount):
+                res += 1 
+                
+        return res 
+    
+    def _getOptimalTradingNum(self, tradingPairs, availableCash:float, currOpenedPositions:dict[str, Position]) -> (int, float):
+        if availableCash <= 0:
+            return (0, 0)
+        res:int = 0
+        if currOpenedPositions:           
+            tmp:float = 0
+            for stock, position in currOpenedPositions.items():
+                tmp += float(position.avg_entry_price) * float(position.qty)
+            avgEntryAmount = tmp / len(currOpenedPositions)
+            res = self._getViableTradesNum(avgEntryAmount)
+        else:
+            tradingNum:int = len(tradingPairs)
+            avgEntryAmount = availableCash / tradingNum
+            while tradingNum > self._getViableTradesNum(avgEntryAmount):
+                tradingNum -= 1
+                avgEntryAmount = availableCash / tradingNum
+            res = tradingNum
+        return (res, avgEntryAmount)
+                  
     
     def openPositions(self) -> None:
         
@@ -85,14 +115,10 @@ class TradingManager:
             print("No trading pairs detected")
             return
        
-        availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent
+        tradingAccount:TradeAccount = self.tradingClient.accountDetail
+        availableCash:float = float(tradingAccount.equity) * (self.entryPercent/2) - (float(tradingAccount.equity) - float(tradingAccount.cash))
         
-        tradeNums:int = (availableCash//(float(list(currOpenedPositions.values())[0].cost_basis)*2)) if \
-            currOpenedPositions and (availableCash//(float(list(currOpenedPositions.values())[0].cost_basis)*2)) <= len(tradingPairs) else len(tradingPairs)
-            
-        notionalAmount:float = float(list(currOpenedPositions.values())[0].cost_basis)*2 if currOpenedPositions else (availableCash)/tradeNums
-        tradeNums -= len(currOpenedPositions)//2 
-        
+        tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)           
         
         if tradeNums < 1:
             print("No more trades can be placed currently")
@@ -100,12 +126,11 @@ class TradingManager:
             
         tradingRecord:dict[tuple, float] = self.tradingRecord
         pairsList:list[tuple] = list(tradingPairs.keys())
-        for i in range(tradeNums):
+        for pair in pairsList:
             try:
-                pair:tuple = pairsList[i]
                 shortOrder, longOrder = self.tradingClient.openPositions(
                     stockPair=(pair[0], pair[1]), 
-                    shortQty=self._getShortableQty(pair[0], notionalAmount/2)
+                    shortQty=self._getShortableQty(pair[0], notionalAmount)
                 )           
                 tradingRecord[pair] = self.tradingPairs[pair][1]
                 print(f"short {pair[0]} long {pair[1]} pair position opened")
@@ -132,7 +157,7 @@ class TradingManager:
         for pair, positions in openedPairsPositions.items():
             meanPriceRatio:float = openedPairs[pair]
             currPriceRatio:float = float(positions[0].current_price) / float(positions[1].current_price)
-        
+            print(f"{pair[0]}--{pair[1]}: curr_ratio: {currPriceRatio}, mean_ratio: {meanPriceRatio}")
             if currPriceRatio <= meanPriceRatio:
                 res.append(pair)
                 
@@ -147,7 +172,7 @@ class TradingManager:
         closeablePairs:list[tuple] = self._getCloseablePairs(currOpenedPositions)
         
         if not closeablePairs:
-            print("no closeable pairs currently")
+            print("no closeable pairs detected currently")
             return 
         
         tradingRecord:dict[tuple, float] = self.tradingRecord
