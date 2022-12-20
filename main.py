@@ -1,11 +1,14 @@
-from PairTrading.util import cleanClosedTrades, getPairsFromTrainingJson
+from PairTrading.util import cleanClosedTrades, getPairsFromTrainingJson, writeToJson
 from PairTrading.trading import TradingManager
+from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.authentication.auth import AlpacaAuth, EodAuth
 from PairTrading.authentication.authLoader import getAuth
+from PairTrading.pairs.createpairs import PairCreator
 
 from alpaca.trading.models import Order
 
 from train import getTrainAssign
+from pandas import DataFrame, read_csv
 from datetime import datetime, date
 from tqdm import tqdm
 import time
@@ -30,11 +33,13 @@ if __name__ == "__main__":
         print(f"new training needs to be conducted -- {reason}")
         getTrainAssign(alpacaAuth, eodAuth, True) 
         
+    #initialize pair-creator 
+    cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
+    pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)
     
-    timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens
-    
+    timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
     if timeTillMarketOpens:
         time.sleep(timeTillMarketOpens + 60)
     else:
@@ -43,5 +48,9 @@ if __name__ == "__main__":
     # start trading
     while manager.tradingClient.clock.is_open:
         manager.openPositions()
-        manager.closePositions()
+        closed:bool = manager.closePositions()
+        if closed:
+            newPairs:dict = pairCreator.getFinalPairs()
+            writeToJson(newPairs, "saveddata/pairs/pairs.json")
+            print("new pairs created")
         time.sleep(60*10) # sleep for 10 minutes

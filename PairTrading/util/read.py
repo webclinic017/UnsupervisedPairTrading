@@ -3,22 +3,21 @@ from datetime import datetime, date
 import os
 
 def readFromJson(filePath:str) -> dict:
-    
+    res = {}
     try:
         with open(filePath, "r") as inFile:
             jsonStr = inFile.read()
-            return json.loads(jsonStr)
-            
-    except Exception as ex:
-        print(ex)
-        return {}
+            res = json.loads(jsonStr)
+    except:      
+        pass 
+    return res if res else {}
     
 def getRecentlyClosed() -> dict[str, date]:
-    if os.path.exists(("saveddata/pairs/recently_closed.json")):
-        res:dict[str, str] = readFromJson("saveddata/pairs/recently_closed.json")
+    if os.path.exists(("saveddata/recently_closed.json")):
+        res:dict[str, str] = readFromJson("saveddata/recently_closed.json")
         for symbol, submitTime in res.items():
             res[symbol] = datetime.strptime(submitTime, "%Y-%m-%d").date()
-        return res
+        return res if res else {}
     
 def getTradingRecord() -> dict[tuple, float]:
     if os.path.exists("saveddata/openedpairs.json"):

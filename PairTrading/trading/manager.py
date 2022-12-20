@@ -91,7 +91,7 @@ class TradingManager:
         if currOpenedPositions:           
             tmp:float = 0
             for stock, position in currOpenedPositions.items():
-                tmp += float(position.avg_entry_price) * float(position.qty)
+                tmp += abs(float(position.avg_entry_price) * float(position.qty))
             avgEntryAmount = tmp / len(currOpenedPositions)
             res = self._getViableTradesNum(avgEntryAmount)
         else:
@@ -116,17 +116,21 @@ class TradingManager:
             return
        
         tradingAccount:TradeAccount = self.tradingClient.accountDetail
-        availableCash:float = float(tradingAccount.equity) * (self.entryPercent/2) - (float(tradingAccount.equity) - float(tradingAccount.cash))
+        totalPosition:float = sum([abs(float(p.cost_basis)) for p in currOpenedPositions.values()])
+        availableCash:float = (float(tradingAccount.cash) * self.entryPercent - totalPosition) / 2
+        print(f"available cash: ${round(availableCash, 2)*2}")
         
         tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)           
-        
         if tradeNums < 1:
             print("No more trades can be placed currently")
             return 
             
         tradingRecord:dict[tuple, float] = self.tradingRecord
         pairsList:list[tuple] = list(tradingPairs.keys())
+        executedTrades:int = 0
         for pair in pairsList:
+            if executedTrades >= tradeNums:
+                break
             try:
                 shortOrder, longOrder = self.tradingClient.openPositions(
                     stockPair=(pair[0], pair[1]), 
@@ -135,6 +139,7 @@ class TradingManager:
                 tradingRecord[pair] = self.tradingPairs[pair][1]
                 print(f"short {pair[0]} long {pair[1]} pair position opened")
                 self.tradingRecord = tradingRecord
+                executedTrades += 1
             except:
                 continue
         
@@ -167,28 +172,31 @@ class TradingManager:
                       
         return res 
     
-    def closePositions(self) -> None:
+    def closePositions(self) -> bool:
         currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions          
         closeablePairs:list[tuple] = self._getCloseablePairs(currOpenedPositions)
         
         if not closeablePairs:
             print("no closeable pairs detected currently")
-            return 
+            return False
         
         tradingRecord:dict[tuple, float] = self.tradingRecord
         recentlyClosed:dict[str, date] = self.recentlyClosed
         
+        
         for pair in closeablePairs:
             order1, order2 = self.tradingClient.closePositions(pair)
-            profit:float = (float(currOpenedPositions[pair[0]].avg_entry_price)-float(order1.filled_avg_price))*float(order1.filled_qty) + \
-                (float(order2.filled_avg_price) - float(currOpenedPositions[pair[1]].avg_entry_price))*float(order2.filled_qty)
-            print(f"closed {pair[0]} <-> {pair[1]} pair position. Profit: ${round(profit, 2)}")
             del tradingRecord[pair]
             recentlyClosed[order1.symbol] = order1.submitted_at.date()
-            recentlyClosed[order2.symbol] = order2.submitted_at.date()
+            recentlyClosed[order2.symbol] = order2.submitted_at.date()       
+            self.tradingRecord = tradingRecord
+            print(f"recently closed: {recentlyClosed}")
+            self.recentlyClosed = recentlyClosed           
+
+            print(f"closed {pair[0]} <-> {pair[1]} pair position.")
+            
+        return True
         
-        self.tradingRecord = tradingRecord
-        self.recentlyClosed = recentlyClosed
         
     
         

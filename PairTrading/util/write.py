@@ -24,4 +24,4 @@ def dumpRecentlyClosed(recentlyClosed:dict[str, date]) -> None:
     for symbol, submitTime in recentlyClosed.items():
         recentlyClosed[symbol] = submitTime.strftime("%Y-%m-%d")
         
-    writeToJson(recentlyClosed, "saveddata/pairs/recently_closed.json")
+    writeToJson(recentlyClosed, "saveddata/recently_closed.json")
