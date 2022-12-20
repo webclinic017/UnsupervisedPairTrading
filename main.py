@@ -11,7 +11,7 @@ from tqdm import tqdm
 import time
 
 ENTRY_PERCENT = 0.3
-REFRESH_DATA = True
+REFRESH_DATA = False
 
 if __name__ == "__main__":
         
@@ -36,8 +36,7 @@ if __name__ == "__main__":
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens
     
     if timeTillMarketOpens:
-        for i in tqdm(range((timeTillMarketOpens//10)+1), desc=f"{round(timeTillMarketOpens/3600, 2)} hours before the market opens"):
-            time.sleep(10)
+        time.sleep(timeTillMarketOpens + 60)
     else:
         print("the market is currently open")
         

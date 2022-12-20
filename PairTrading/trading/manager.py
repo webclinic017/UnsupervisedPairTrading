@@ -160,10 +160,10 @@ class TradingManager:
             print(f"{pair[0]}--{pair[1]}: curr_ratio: {currPriceRatio}, mean_ratio: {meanPriceRatio}")
             if currPriceRatio <= meanPriceRatio:
                 res.append(pair)
-                
-            ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
-            if (date.today() - ordersList[0].submitted_at.date()).days > 30:
-                res.append(pair)
+            else:   
+                ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
+                if (date.today() - ordersList[0].submitted_at.date()).days > 30:
+                    res.append(pair)
                       
         return res 
     
