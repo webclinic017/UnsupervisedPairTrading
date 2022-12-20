@@ -25,7 +25,8 @@ class PairCreator:
         res:dict = {}
         res["time"] = date.today().strftime("%Y-%m-%d")
         finalPairs:dict = {}
-        viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in self._getTradeablePairs().index]
+        pairsDF:DataFrame = self._getTradeablePairs()
+        viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in pairsDF.index]
         
         for pair1, pair2 in viablePairs:
             pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"])
@@ -34,7 +35,7 @@ class PairCreator:
             priceRatio:array = pair1DailyDF/ pair2DailyDF
             
             if (priceRatio[-1] - priceRatio.mean()) / priceRatio.std() > 0:
-                finalPairs[",".join([pair1, pair2])] = (priceRatio[-1], priceRatio.mean())
+                finalPairs[",".join([pair1, pair2])] = (pairsDF.loc[",".join([pair1, pair2])]["momentum_zscore"], priceRatio.mean())
         res["final_pairs"] = finalPairs 
         return res
     
@@ -47,7 +48,7 @@ class PairCreator:
         sc = StandardScaler()
         pairsDF:DataFrame = DataFrame(sc.fit_transform(pairData), index=pairCandidates.index, columns=["momentum_zscore"])     
         
-        return pairsDF.loc[pairsDF["momentum_zscore"] > 2]
+        return pairsDF.loc[pairsDF["momentum_zscore"] > 2].sort_values(by=["momentum_zscore"], ascending=False)
                       
         
     def _formPairs(self) -> dict:
