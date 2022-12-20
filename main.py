@@ -10,7 +10,7 @@ from datetime import datetime, date
 from tqdm import tqdm
 import time
 
-ENTRY_PERCENT = 1
+ENTRY_PERCENT = 0.3
 REFRESH_DATA = True
 
 if __name__ == "__main__":
