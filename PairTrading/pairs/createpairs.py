@@ -28,14 +28,19 @@ class PairCreator:
         pairsDF:DataFrame = self._getTradeablePairs()
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in pairsDF.index]
         
+        tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
             pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"])
             pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"])
 
             priceRatio:array = pair1DailyDF/ pair2DailyDF
-            
-            if (priceRatio[-1] - priceRatio.mean()) / priceRatio.std() > 0:
-                finalPairs[",".join([pair1, pair2])] = (pairsDF.loc[",".join([pair1, pair2])]["momentum_zscore"], priceRatio.mean())
+            currPriceRatio:float = self.dataClient.getLatestQuote(pair1).bid_price / self.dataClient.getLatestQuote(pair2).ask_price
+                      
+            if (currPriceRatio - priceRatio.mean()) / priceRatio.std() > 1:
+                tmpDict[",".join([pair1, pair2])] = ((currPriceRatio - priceRatio.mean()) / priceRatio.std(), priceRatio.mean())
+        tmpStd:list = list(Series({key:value[0] for key, value in tmpDict.items()}).sort_values(ascending=False).keys())
+        for pair in tmpStd:
+            finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])
         res["final_pairs"] = finalPairs 
         return res
     
@@ -48,7 +53,7 @@ class PairCreator:
         sc = StandardScaler()
         pairsDF:DataFrame = DataFrame(sc.fit_transform(pairData), index=pairCandidates.index, columns=["momentum_zscore"])     
         
-        return pairsDF.loc[pairsDF["momentum_zscore"] > 2].sort_values(by=["momentum_zscore"], ascending=False)
+        return pairsDF.loc[pairsDF["momentum_zscore"] > 1].sort_values(by=["momentum_zscore"], ascending=False)
                       
         
     def _formPairs(self) -> dict:

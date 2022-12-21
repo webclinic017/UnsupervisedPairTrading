@@ -40,6 +40,11 @@ if __name__ == "__main__":
     #initialize pair-creator 
     cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
     pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
+    
+    # update viable pairs
+    newPairs:dict = pairCreator.getFinalPairs()
+    writeToJson(newPairs, "saveddata/pairs/pairs.json")
+    
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)
     
@@ -51,13 +56,10 @@ if __name__ == "__main__":
         print("the market is currently open")
         
     
+    
         
     # start trading
-    while manager.tradingClient.clock.is_open:
-        # update viable pairs
-        newPairs:dict = pairCreator.getFinalPairs()
-        writeToJson(newPairs, "saveddata/pairs/pairs.json")
-        
+    while manager.tradingClient.clock.is_open:       
         manager.openPositions()
         time.sleep(10)
         closed:bool = manager.closePositions()
@@ -66,3 +68,7 @@ if __name__ == "__main__":
             writeToJson(newPairs, "saveddata/pairs/pairs.json")
             print("new pairs created")
         time.sleep(60*5) # sleep for 5 minutes
+        
+        # update viable pairs
+        newPairs:dict = pairCreator.getFinalPairs()
+        writeToJson(newPairs, "saveddata/pairs/pairs.json")
