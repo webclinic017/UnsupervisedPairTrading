@@ -93,7 +93,7 @@ class TradingManager:
             for stock, position in currOpenedPositions.items():
                 tmp += abs(float(position.avg_entry_price) * float(position.qty))
             avgEntryAmount = tmp / len(currOpenedPositions)
-            res = self._getViableTradesNum(avgEntryAmount)
+            res = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount))
         else:
             tradingNum:int = len(tradingPairs)
             avgEntryAmount = availableCash / tradingNum

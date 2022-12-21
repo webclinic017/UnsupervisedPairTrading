@@ -8,15 +8,19 @@ from PairTrading.pairs.createpairs import PairCreator
 from alpaca.trading.models import Order
 
 from train import getTrainAssign
+from log import Logger
 from pandas import DataFrame, read_csv
 from datetime import datetime, date
 from tqdm import tqdm
 import time
+import sys
 
 ENTRY_PERCENT = 0.3
 REFRESH_DATA = False
 
+
 if __name__ == "__main__":
+    
         
     # see if we need to review trades that were recently closed 
     cleanClosedTrades()
@@ -41,16 +45,24 @@ if __name__ == "__main__":
     
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
     if timeTillMarketOpens:
+        print("waiting for market to open")
         time.sleep(timeTillMarketOpens + 60)
     else:
         print("the market is currently open")
         
+    
+        
     # start trading
     while manager.tradingClient.clock.is_open:
+        # update viable pairs
+        newPairs:dict = pairCreator.getFinalPairs()
+        writeToJson(newPairs, "saveddata/pairs/pairs.json")
+        
         manager.openPositions()
+        time.sleep(10)
         closed:bool = manager.closePositions()
         if closed:
             newPairs:dict = pairCreator.getFinalPairs()
             writeToJson(newPairs, "saveddata/pairs/pairs.json")
             print("new pairs created")
-        time.sleep(60*10) # sleep for 10 minutes
+        time.sleep(60*5) # sleep for 5 minutes

@@ -7,7 +7,7 @@ from datetime import datetime, date
 def cleanClosedTrades() -> None:    
     closedTrades:dict[str, date] = getRecentlyClosed()
     if not closedTrades:
-        print("There are no trades that were conducted less than 31 days ago")
+        print("There are no trades that were closed less than 31 days ago")
         return 
     today:date = date.today()
     

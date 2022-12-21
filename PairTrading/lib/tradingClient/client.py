@@ -3,9 +3,9 @@ from PairTrading.authentication.enums import ConfigType
 from PairTrading.util.read import getRecentlyClosed
 
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce
+from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce, QueryOrderStatus
 from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest, GetOrdersRequest
-from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock, OrderStatus
+from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
 
 from datetime import date, datetime, timezone
 import time
@@ -77,7 +77,7 @@ class AlpacaTradingClient:
         self.client.get
         return self.client.get_orders(
             GetOrdersRequest(
-                status=OrderStatus.FILLED,
+                status=QueryOrderStatus.CLOSED,
                 symbols=list(pairSymbols)
             )
         )
@@ -90,24 +90,36 @@ class AlpacaTradingClient:
             raise ValueError("insufficient shares number forecasted")
         
         # short the first stock
-        shortOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
-            symbol=stockPair[0],
-            qty=shortQty,
-            side=OrderSide.SELL,
-            time_in_force=TimeInForce.DAY            
-        ))
+        for i in range(3):
+            try:               
+                shortOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
+                    symbol=stockPair[0],
+                    qty=shortQty,
+                    side=OrderSide.SELL,
+                    time_in_force=TimeInForce.DAY            
+                ))
+            except:
+                time.sleep(1)
+            finally:
+                break
         
         time.sleep(1)
         filledShortOrder:Order = self.client.get_order_by_id(shortOrder.id)
         longNotional:float = float(filledShortOrder.filled_qty) * float(filledShortOrder.filled_avg_price)
         
         # long the second stock
-        longOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
-            symbol=stockPair[1],
-            notional=longNotional,
-            side=OrderSide.BUY,
-            time_in_force=TimeInForce.DAY            
-        ))
+        for i in range(3):
+            try:
+                longOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
+                    symbol=stockPair[1],
+                    notional=longNotional,
+                    side=OrderSide.BUY,
+                    time_in_force=TimeInForce.DAY            
+                ))
+            except:
+                time.sleep(1)
+            finally:
+                break
         time.sleep(1)
         filledLongOrder:Order = self.client.get_order_by_id(longOrder.id)
         return (filledShortOrder, filledLongOrder)
