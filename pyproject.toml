@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "pairtrading"
+version = "0.1.0"
+description = "statistical arbitrage strategy that utilizes unsupervised learning with fundamental and technical metrics"
+authors = ["John Xu <haoxuanxu@uchicago.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+alpaca-py = "^0.6.1"
+pandas = "^1.5.2"
+tqdm = "^4.64.1"
+statsmodels = "^0.13.5"
+numpy = "^1.24.0"
+eod = "^0.2.1"
+scikit-learn = "^1.2.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

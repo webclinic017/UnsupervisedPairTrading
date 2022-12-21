@@ -4,7 +4,7 @@ from PairTrading.data.fundamentals.util import *
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
-from overrides import override
+
 
 import warnings
 warnings.filterwarnings("ignore")

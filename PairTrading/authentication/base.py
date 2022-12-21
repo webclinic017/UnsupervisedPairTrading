@@ -1,7 +1,7 @@
 from PairTrading.authentication.enums import ConfigType
-from overrides import EnforceOverrides
 
-class BaseAuth(EnforceOverrides):
+
+class BaseAuth:
     def __init__(self, api_key, secret_key:str, isPaper:bool=True):
         self.configType = ConfigType.BASE
         self.api_key:str = api_key

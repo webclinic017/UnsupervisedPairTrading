@@ -3,7 +3,7 @@ from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest
 from alpaca.data.models import Quote
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
-from  PairTrading.authentication.auth import AlpacaAuth
+from PairTrading.authentication.auth import AlpacaAuth
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.lib.dataEngine.common import BarCollection
 

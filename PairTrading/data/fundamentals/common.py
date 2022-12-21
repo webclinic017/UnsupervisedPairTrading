@@ -1,7 +1,6 @@
 from abc import ABC 
-from overrides import EnforceOverrides, final
 
-class FundamentalsBase(ABC, EnforceOverrides):
+class FundamentalsBase(ABC):
     
     def __init__(self, rawFile:dict):
         self._rawFile:dict = rawFile
@@ -18,13 +17,13 @@ class FundamentalsBase(ABC, EnforceOverrides):
         self._readIncomeBalanceCash()
         self._readFundamentalSummary()
         
-    @final
+
     def _readIncomeBalanceCash(self) -> None:
         self.incomeStatement = list(self._rawFile["Financials"]["Income_Statement"]["quarterly"].values())
         self.balanceSheet = list(self._rawFile["Financials"]["Balance_Sheet"]["quarterly"].values())
         self.cashFlow = list(self._rawFile["Financials"]["Cash_Flow"]["quarterly"].values())
        
-    @final 
+
     def _readFundamentalSummary(self) -> None:
         self.general = self._rawFile["General"]
         self.highlights = self._rawFile["Highlights"]

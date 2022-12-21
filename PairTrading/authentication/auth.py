@@ -1,6 +1,5 @@
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.authentication.enums import ConfigType
-from overrides import override
 
 class AlpacaAuth(BaseAuth):
     def __init__(self, api_key, secret_key:str, isPaper:bool=True):
@@ -9,7 +8,7 @@ class AlpacaAuth(BaseAuth):
         self.isPaper:bool = isPaper
         
     @classmethod
-    @override
+
     def create(cls, rawDict, isPaper:bool):
         if isPaper:
             return cls(
@@ -22,7 +21,6 @@ class AlpacaAuth(BaseAuth):
                 secret_key=rawDict["live"]["secret_key"],
                 isPaper=False)
         
-    @override
     def __str__(self):
         return str({
             "type": self.configType,
@@ -37,12 +35,10 @@ class EodAuth(BaseAuth):
         self.configType = ConfigType.EOD
         
     @classmethod
-    @override
     def create(cls, rawDict, isPaper=True):
         return cls(
             api_key=rawDict["api_key"])
         
-    @override
     def __str__(self):
         return str({
             "type": self.configType,
