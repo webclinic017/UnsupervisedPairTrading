@@ -1,5 +1,8 @@
 import json 
 from datetime import datetime, date
+import logging 
+
+logger = logging.getLogger(__name__)
 
 def writeToJson(data:dict, filePath:str) -> bool:
     
@@ -10,7 +13,7 @@ def writeToJson(data:dict, filePath:str) -> bool:
             return True
             
     except Exception as ex:
-        print(ex)
+        logger.error(ex)
         return False
         
 def dumpTradingRecord(record:dict[tuple, float]) -> None:

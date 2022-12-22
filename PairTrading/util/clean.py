@@ -2,12 +2,15 @@ from PairTrading.util.read import getRecentlyClosed
 from PairTrading.util.write import dumpRecentlyClosed
 
 from datetime import datetime, date 
+import logging 
+
+logger = logging.getLogger(__name__)
 
 
 def cleanClosedTrades() -> None:    
     closedTrades:dict[str, date] = getRecentlyClosed()
     if not closedTrades:
-        print("There are no trades that were closed less than 31 days ago")
+        logger.debug("There are no trades that were closed less than 31 days ago")
         return 
     today:date = date.today()
     
@@ -18,5 +21,5 @@ def cleanClosedTrades() -> None:
             delNum += 1
             
     dumpRecentlyClosed(closedTrades)
-    print(f"{delNum} past trading records removed")
+    logger.info(f"{delNum} past trading records removed")
     

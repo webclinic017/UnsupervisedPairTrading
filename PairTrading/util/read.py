@@ -30,7 +30,7 @@ def getTradingRecord() -> dict[tuple, float]:
     
 def getPairsFromTrainingJson() -> dict:
     if not os.path.exists("saveddata/pairs/pairs.json"):
-        print("pairs.json file does not exist")
+        logger.debug("pairs.json file does not exist")
         return {}
 
     pairs:dict = readFromJson("saveddata/pairs/pairs.json")

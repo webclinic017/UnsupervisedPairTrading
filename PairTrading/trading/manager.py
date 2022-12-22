@@ -8,7 +8,12 @@ from alpaca.trading.models import TradeAccount, Position, Order
 
 
 import os
+import logging
 from datetime import date, datetime
+
+logger = logging.getLogger(__name__)
+
+
 class TradingManager:
     _instance = None 
     def __new__(cls, tradingClient:AlpacaTradingClient, dataClient:AlpacaDataClient, entryPercent:float):
@@ -112,17 +117,17 @@ class TradingManager:
             openedPositions=currOpenedPositions
         )
         if not tradingPairs:
-            print("No trading pairs detected")
+            logger.debug("No trading pairs detected")
             return
        
         tradingAccount:TradeAccount = self.tradingClient.accountDetail
         totalPosition:float = sum([abs(float(p.cost_basis)) for p in currOpenedPositions.values()])
         availableCash:float = (float(tradingAccount.cash) * self.entryPercent - totalPosition) / 2
-        print(f"available cash: ${round(availableCash, 2)*2}")
+        logger.info(f"available cash: ${round(availableCash, 2)*2}")
         
         tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)           
         if tradeNums < 1:
-            print("No more trades can be placed currently")
+            logger.info("No more trades can be placed currently")
             return 
             
         tradingRecord:dict[tuple, float] = self.tradingRecord
@@ -137,7 +142,7 @@ class TradingManager:
                     shortQty=self._getShortableQty(pair[0], notionalAmount)
                 )           
                 tradingRecord[pair] = self.tradingPairs[pair][1]
-                print(f"short {pair[0]} long {pair[1]} pair position opened")
+                logger.info(f"short {pair[0]} long {pair[1]} pair position opened")
                 self.tradingRecord = tradingRecord
                 executedTrades += 1
             except:
@@ -156,13 +161,13 @@ class TradingManager:
             openedPositions=currOpenedPositions
         )
         if not openedPairsPositions:
-            print("No pairs opened")
+            logger.debug("No pairs opened")
             return
         
         for pair, positions in openedPairsPositions.items():
             meanPriceRatio:float = openedPairs[pair]
             currPriceRatio:float = float(positions[0].current_price) / float(positions[1].current_price)
-            print(f"{pair[0]}--{pair[1]}: curr_ratio: {currPriceRatio}, mean_ratio: {meanPriceRatio}")
+            logger.info(f"{pair[0]}--{pair[1]}: curr_ratio: {currPriceRatio}, mean_ratio: {meanPriceRatio}")
             if currPriceRatio <= meanPriceRatio:
                 res.append(pair)
             else:   
@@ -177,7 +182,7 @@ class TradingManager:
         closeablePairs:list[tuple] = self._getCloseablePairs(currOpenedPositions)
         
         if not closeablePairs:
-            print("no closeable pairs detected currently")
+            logger.debug("no closeable pairs detected currently")
             return False
         
         tradingRecord:dict[tuple, float] = self.tradingRecord
@@ -190,10 +195,10 @@ class TradingManager:
             recentlyClosed[order1.symbol] = order1.submitted_at.date()
             recentlyClosed[order2.symbol] = order2.submitted_at.date()       
             self.tradingRecord = tradingRecord
-            print(f"recently closed: {recentlyClosed}")
+            logger.info(f"recently closed: {recentlyClosed}")
             self.recentlyClosed = recentlyClosed           
 
-            print(f"closed {pair[0]} <-> {pair[1]} pair position.")
+            logger.info(f"closed {pair[0]} <-> {pair[1]} pair position.")
             
         return True
         

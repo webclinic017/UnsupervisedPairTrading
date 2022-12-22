@@ -8,6 +8,7 @@ from PairTrading.pairs.createpairs import PairCreator
 from alpaca.trading.models import Order
 
 from train import getTrainAssign
+import logging
 from log import Logger
 from pandas import DataFrame, read_csv
 from datetime import datetime, date
@@ -20,7 +21,9 @@ REFRESH_DATA = False
 
 
 if __name__ == "__main__":
-    
+    logging.basicConfig(filename="saveddata/log/trading.log", filemode="w", format="%(asctime)s - %(message)s", level=logging.INFO)   
+    # logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
+    logger = logging.getLogger(__name__)
         
     # see if we need to review trades that were recently closed 
     cleanClosedTrades()
@@ -34,7 +37,7 @@ if __name__ == "__main__":
     todayTrained:bool = (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days == 0
     if (date.today().day==2 and not todayTrained) or REFRESH_DATA:
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
-        print(f"new training needs to be conducted -- {reason}")
+        logger.info(f"new training needs to be conducted -- {reason}")
         getTrainAssign(alpacaAuth, eodAuth, True) 
         
     #initialize pair-creator 
@@ -50,10 +53,10 @@ if __name__ == "__main__":
     
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
     if timeTillMarketOpens:
-        print("waiting for market to open")
+        logger.info("waiting for market to open")
         time.sleep(timeTillMarketOpens + 60)
     else:
-        print("the market is currently open")
+        logger.info("the market is currently open")
         
     
     
@@ -66,7 +69,7 @@ if __name__ == "__main__":
         if closed:
             newPairs:dict = pairCreator.getFinalPairs()
             writeToJson(newPairs, "saveddata/pairs/pairs.json")
-            print("new pairs created")
+            logger.info("new pairs created")
         time.sleep(60*5) # sleep for 5 minutes
         
         # update viable pairs
