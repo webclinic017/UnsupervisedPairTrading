@@ -106,6 +106,10 @@ class TradingManager:
                 tradingNum -= 1
                 avgEntryAmount = availableCash / tradingNum
             res = tradingNum
+        
+        if res > len(tradingPairs):
+            res = len(tradingPairs)
+            avgEntryAmount = availableCash / res 
         return (res, avgEntryAmount)
                   
     

@@ -17,7 +17,7 @@ import time
 import sys
 
 ENTRY_PERCENT = 0.3
-REFRESH_DATA = True
+REFRESH_DATA = False
 
 
 if __name__ == "__main__":
@@ -53,8 +53,12 @@ if __name__ == "__main__":
     
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
     if timeTillMarketOpens:
-        logger.info("waiting for market to open")
-        time.sleep(timeTillMarketOpens + 60)
+        if timeTillMarketOpens < 3600 * 8:
+            logger.info("waiting for market to open")
+            time.sleep(timeTillMarketOpens + 60)
+        else:
+            logger.info("market is not open today")
+            sys.exit()
     else:
         logger.info("the market is currently open")
         
