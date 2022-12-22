@@ -17,12 +17,12 @@ import time
 import sys
 
 ENTRY_PERCENT = 0.3
-REFRESH_DATA = True
+REFRESH_DATA = False
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename="saveddata/log/trading.log", filemode="w", format="%(asctime)s - %(message)s", level=logging.INFO)   
-    # logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
+    # logging.basicConfig(filename="saveddata/log/trading.log", filemode="w", format="%(asctime)s - %(message)s", level=logging.INFO)   
+    logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
     logger = logging.getLogger(__name__)
         
     # see if we need to review trades that were recently closed 
