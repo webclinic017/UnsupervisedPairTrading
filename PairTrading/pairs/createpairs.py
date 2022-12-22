@@ -34,10 +34,9 @@ class PairCreator:
             pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"])
 
             priceRatio:array = pair1DailyDF/ pair2DailyDF
-            currPriceRatio:float = self.dataClient.getLatestQuote(pair1).bid_price / self.dataClient.getLatestQuote(pair2).ask_price
                       
-            if (currPriceRatio - priceRatio.mean()) / priceRatio.std() > 1:
-                tmpDict[",".join([pair1, pair2])] = ((currPriceRatio - priceRatio.mean()) / priceRatio.std(), priceRatio.mean())
+            if (priceRatio[-1] - priceRatio.mean()) / priceRatio.std() > 1:
+                tmpDict[",".join([pair1, pair2])] = ((priceRatio[-1] - priceRatio.mean()) / priceRatio.std(), priceRatio.mean())
         tmpStd:list = list(Series({key:value[0] for key, value in tmpDict.items()}).sort_values(ascending=False).keys())
         for pair in tmpStd:
             finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])

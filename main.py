@@ -17,7 +17,7 @@ import time
 import sys
 
 ENTRY_PERCENT = 0.3
-REFRESH_DATA = False
+REFRESH_DATA = True
 
 
 if __name__ == "__main__":
