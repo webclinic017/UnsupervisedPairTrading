@@ -17,7 +17,7 @@ import time
 import sys
 
 ENTRY_PERCENT = 0.3
-REFRESH_DATA = False
+REFRESH_DATA = True
 
 
 if __name__ == "__main__":
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     if (date.today().day==2 and not todayTrained) or REFRESH_DATA:
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
         logger.info(f"new training needs to be conducted -- {reason}")
-        getTrainAssign(alpacaAuth, eodAuth, True) 
+        getTrainAssign(alpacaAuth, eodAuth, False) 
         
     #initialize pair-creator 
     cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
