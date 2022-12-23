@@ -51,14 +51,17 @@ if __name__ == "__main__":
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)
     
-    timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
-    if timeTillMarketOpens:
-        if timeTillMarketOpens < 3600 * 8:
+    timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
+    while not manager.tradingClient.clock.is_open:
+        if 0 < timeTillMarketOpens <= 3600 * 8:
             logger.info("waiting for market to open")
             time.sleep(timeTillMarketOpens + 60)
-        else:
+        elif timeTillMarketOpens > 3600 * 8:
             logger.info("market is not open today")
             sys.exit()
+        else:
+            time.sleep(10 * 60)
+        timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens            
     else:
         logger.info("the market is currently open")
         
