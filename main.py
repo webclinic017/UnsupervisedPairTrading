@@ -62,8 +62,8 @@ if __name__ == "__main__":
         else:
             time.sleep(10 * 60)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens            
-    else:
-        logger.info("the market is currently open")
+
+    logger.info("the market is currently open")
         
     
     
