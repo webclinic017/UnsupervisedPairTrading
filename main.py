@@ -9,7 +9,6 @@ from alpaca.trading.models import Order
 
 from train import getTrainAssign
 import logging
-from log import Logger
 from pandas import DataFrame, read_csv
 from datetime import datetime, date
 from tqdm import tqdm
