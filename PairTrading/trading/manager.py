@@ -2,6 +2,7 @@ from PairTrading.lib.tradingClient import AlpacaTradingClient
 from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.read import readFromJson, getRecentlyClosed, getTradingRecord, getPairsFromTrainingJson
 from PairTrading.util.write import writeToJson, dumpRecentlyClosed, dumpTradingRecord
+from PairTrading.trading.helper import PairInfoRetriever
 from PairTrading.authentication import AlpacaAuth
 
 from alpaca.trading.models import TradeAccount, Position, Order
@@ -24,6 +25,7 @@ class TradingManager:
     def __init__(self, tradingClient:AlpacaTradingClient, dataClient:AlpacaDataClient, entryPercent:float):
         self.tradingClient:AlpacaTradingClient = tradingClient
         self.dataClient:AlpacaDataClient = dataClient
+        self.pairInfoRetriever:PairInfoRetriever = PairInfoRetriever.create(tradingClient)
         self.entryPercent:float = entryPercent
         
     @classmethod
@@ -35,10 +37,6 @@ class TradingManager:
             dataClient=dataClient,
             entryPercent=entryPercent
         )
-    
-    @property
-    def tradingPairs(self) -> dict[tuple, list]:
-        return getPairsFromTrainingJson()["final_pairs"]
         
     @property 
     def tradingRecord(self) -> dict[tuple, float]:
@@ -47,34 +45,7 @@ class TradingManager:
     @tradingRecord.setter
     def tradingRecord(self, rec:dict[tuple, float]) -> None:
         dumpTradingRecord(rec)
-        
-    @property 
-    def recentlyClosed(self) -> dict[str, date]:
-        return getRecentlyClosed() 
-    
-    @recentlyClosed.setter 
-    def recentlyClosed(self, rec:dict[str, date]) -> None:
-        dumpRecentlyClosed(rec)
-    
-    def _filterExistingPairPositions(self, pairs:dict[tuple, list], openedPositions:dict[str, Position]) -> dict[tuple, list]:
-        if not pairs:
-            return None
-        res:dict[tuple, list] = pairs.copy()
-        for stock1, stock2 in pairs.keys():
-            if stock1 in openedPositions or stock2 in openedPositions:
-                del res[(stock1, stock2)]
-        return res
-    
-    def _fetchExistingPairPositions(self, pairs:dict[tuple, float], openedPositions:dict[str, Position]) -> dict[tuple, list]:
-        if not pairs:
-            return None 
-        res:dict[tuple, list] = {}
-        for stock1, stock2 in pairs.keys():
-            if stock1 in openedPositions and stock2 in openedPositions:
-                res[(stock1, stock2)] = [openedPositions[stock1], openedPositions[stock2]]
-               
-        return res       
-    
+         
     def _getShortableQty(self, symbol:str, notionalAmount) -> float:
         latestBidPrice:float = self.dataClient.getLatestQuote(symbol).bid_price
         rawQty:float = notionalAmount // latestBidPrice
@@ -83,7 +54,8 @@ class TradingManager:
     
     def _getViableTradesNum(self, entryAmount:float) -> int:
         res:int = 0
-        for pair, _ in self.tradingPairs.items():
+        
+        for pair, _ in self.pairInfoRetriever.trainedPairs.items():
             if self._getShortableQty(pair[0], entryAmount):
                 res += 1 
                 
@@ -116,8 +88,8 @@ class TradingManager:
     def openPositions(self) -> None:
         
         currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions
-        tradingPairs:dict[tuple, list] = self._filterExistingPairPositions(
-            pairs=self.tradingPairs,
+        tradingPairs:dict[tuple, list] = self.pairInfoRetriever.getTradablePairs(
+            pairs=self.pairInfoRetriever.trainedPairs, 
             openedPositions=currOpenedPositions
         )
         if not tradingPairs:
@@ -145,7 +117,7 @@ class TradingManager:
                     stockPair=(pair[0], pair[1]), 
                     shortQty=self._getShortableQty(pair[0], notionalAmount)
                 )           
-                tradingRecord[pair] = self.tradingPairs[pair][1]
+                tradingRecord[pair] = self.pairInfoRetriever.trainedPairs[pair][1]
                 logger.info(f"short {pair[0]} long {pair[1]} pair position opened")
                 self.tradingRecord = tradingRecord
                 executedTrades += 1
@@ -159,11 +131,11 @@ class TradingManager:
                          
     def _getCloseablePairs(self, currOpenedPositions:dict[str, Position]) -> list[tuple]:
         res:list[tuple] = []        
-        openedPairs:dict[tuple, float] = self.tradingRecord          
-        openedPairsPositions:dict[tuple, list] = self._fetchExistingPairPositions(
+        openedPairs:dict[tuple, float] = self.tradingRecord     
+        openedPairsPositions:dict[tuple, list] = self.pairInfoRetriever.getCurrentlyOpenedPairs(
             pairs=openedPairs, 
-            openedPositions=currOpenedPositions
-        )
+            openedPositions=currOpenedPositions)     
+        
         if not openedPairsPositions:
             logger.debug("No pairs opened")
             return
@@ -190,8 +162,7 @@ class TradingManager:
             return False
         
         tradingRecord:dict[tuple, float] = self.tradingRecord
-        recentlyClosed:dict[str, date] = self.recentlyClosed
-        
+        recentlyClosed:dict[str, date] = self.pairInfoRetriever.recentlyClosedPositions
         
         for pair in closeablePairs:
             order1, order2 = self.tradingClient.closePositions(pair)
@@ -200,7 +171,7 @@ class TradingManager:
             recentlyClosed[order2.symbol] = order2.submitted_at.date()       
             self.tradingRecord = tradingRecord
             logger.info(f"recently closed: {recentlyClosed}")
-            self.recentlyClosed = recentlyClosed           
+            self.pairInfoRetriever.recentlyClosedPositions = recentlyClosed      
 
             logger.info(f"closed {pair[0]} <-> {pair[1]} pair position.")
             
