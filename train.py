@@ -41,10 +41,10 @@ def getTrainAssign(alpacaAuth, eodAuth:BaseAuth, useExistingFile:bool=True) -> N
     clusters.to_csv("saveddata/cluster.csv")
     
     # assign stock pairs and find the most salient pairs
-    today:str = date.today().strftime("%Y-%m-%d")
     pairCreator = PairCreator.create(clusters, dataClient)
-    res:dict = {"time": today}
-    res:dict = pairCreator.getFinalPairs(res)
+    res:dict = pairCreator.getFinalPairs(
+        trainDate=date.today().strftime("%Y-%m-%d")
+    )
     
     writeToJson(res, "saveddata/pairs/pairs.json")
 

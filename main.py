@@ -44,7 +44,9 @@ if __name__ == "__main__":
     pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
     
     # update viable pairs
-    newPairs:dict = pairCreator.getFinalPairs()
+    trainedPairs = getPairsFromTrainingJson()
+    trainDate:date = datetime.strptime(trainedPairs["time"], "%Y-%m-%d").date()
+    newPairs:dict = pairCreator.getFinalPairs(trainDate)
     writeToJson(newPairs, "saveddata/pairs/pairs.json")
     
     # initialize trading manager
@@ -63,9 +65,7 @@ if __name__ == "__main__":
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens            
 
     logger.info("the market is currently open")
-        
-    
-    
+           
         
     # start trading
     while manager.tradingClient.clock.is_open:       
@@ -73,11 +73,11 @@ if __name__ == "__main__":
         time.sleep(10)
         closed:bool = manager.closePositions()
         if closed:
-            newPairs:dict = pairCreator.getFinalPairs()
+            newPairs:dict = pairCreator.getFinalPairs(trainDate)
             writeToJson(newPairs, "saveddata/pairs/pairs.json")
             logger.info("new pairs created")
         time.sleep(60*5) # sleep for 5 minutes
         
         # update viable pairs
-        newPairs:dict = pairCreator.getFinalPairs()
+        newPairs:dict = pairCreator.getFinalPairs(trainDate)
         writeToJson(newPairs, "saveddata/pairs/pairs.json")

@@ -21,7 +21,8 @@ class PairCreator:
     def create(cls, clusterDF:DataFrame, client:AlpacaDataClient):
         return cls(clusterDF, client)
     
-    def getFinalPairs(self, res:dict) -> dict[str, list]:
+    def getFinalPairs(self, trainDate:date) -> dict[str, list]:
+        res = {"time": trainDate.strftime("%Y-%m-%d")}
         finalPairs:dict = {}
         pairsDF:DataFrame = self._getTradeablePairs()
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in pairsDF.index]
