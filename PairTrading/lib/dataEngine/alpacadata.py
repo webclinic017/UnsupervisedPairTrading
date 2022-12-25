@@ -6,7 +6,7 @@ from alpaca.data.enums import Adjustment, DataFeed
 from PairTrading.authentication.auth import AlpacaAuth
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.lib.dataEngine.common import BarCollection
-from PairTrading.util import Singleton
+from PairTrading.util.patterns import Singleton
 
 import pandas as pd 
 from datetime import datetime

@@ -4,7 +4,7 @@ from PairTrading.data.technicals import TechnicalData
 from PairTrading.authentication import AlpacaAuth, EodAuth
 from PairTrading.util.write import writeToJson
 from PairTrading.util.read import readFromJson
-from PairTrading.util import Singleton
+from PairTrading.util.patterns import Singleton
 from PairTrading.authentication.enums import ConfigType
 
 from pandas import DataFrame, Series, concat

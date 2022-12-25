@@ -1,7 +1,7 @@
 from PairTrading.authentication import AlpacaAuth
 from PairTrading.authentication.enums import ConfigType
 from PairTrading.util.read import getRecentlyClosed
-from PairTrading.util import Singleton
+from PairTrading.util.patterns import Singleton
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce, QueryOrderStatus

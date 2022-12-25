@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import AgglomerativeClustering
 
-from PairTrading.util import Singleton
+from PairTrading.util.patterns import Singleton
 
 from pandas import DataFrame
 import numpy as np

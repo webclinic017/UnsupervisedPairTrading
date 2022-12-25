@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from datetime import date
 
 from PairTrading.lib.dataEngine import AlpacaDataClient
-from PairTrading.util import Singleton
+from PairTrading.util.patterns import Singleton
 
 
 
