@@ -1,6 +1,7 @@
 from PairTrading.authentication import AlpacaAuth
 from PairTrading.authentication.enums import ConfigType
 from PairTrading.util.read import getRecentlyClosed
+from PairTrading.util import Singleton
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce, QueryOrderStatus
@@ -10,13 +11,7 @@ from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
 from datetime import date, datetime, timezone
 import time
 
-class AlpacaTradingClient:
-    # the trading client implements the singleton pattern
-    _instance = None     
-    def __new__(cls, auth:AlpacaAuth):
-        if not cls._instance:
-            cls._instance = super(AlpacaTradingClient, cls).__new__(AlpacaTradingClient)
-        return cls._instance
+class AlpacaTradingClient(metaclass=Singleton):
     
     def __init__(self, auth:AlpacaAuth):
         self.client:TradingClient = TradingClient(

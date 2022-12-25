@@ -3,15 +3,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import AgglomerativeClustering
 
+from PairTrading.util import Singleton
+
 from pandas import DataFrame
 import numpy as np
 
-class Clustering:
-    _instance = None 
-    def __new__(cls, inputData:DataFrame):
-        if not cls._instance:
-            cls._instance = super(Clustering, cls).__new__(Clustering)
-        return cls._instance
+class Clustering(metaclass=Singleton):
+    
     def __init__(self, inputData:DataFrame):
         self.inputData:DataFrame = inputData
         self.dataPipeline:Pipeline = Pipeline([

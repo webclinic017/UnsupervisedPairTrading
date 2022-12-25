@@ -4,6 +4,7 @@ from PairTrading.data.technicals import TechnicalData
 from PairTrading.authentication import AlpacaAuth, EodAuth
 from PairTrading.util.write import writeToJson
 from PairTrading.util.read import readFromJson
+from PairTrading.util import Singleton
 from PairTrading.authentication.enums import ConfigType
 
 from pandas import DataFrame, Series, concat
@@ -18,18 +19,7 @@ import warnings
 
 
 
-class FeatureGenerator:
-    _instance = None 
-    # feature generator implements the singleton pattern
-    def __new__(
-        cls,
-        alpacaAuth:AlpacaAuth, 
-        eodAuth:EodAuth,
-        stocks:list
-    ):
-        if cls._instance is None:
-            cls._instance = super(FeatureGenerator, cls).__new__(FeatureGenerator)
-        return cls._instance
+class FeatureGenerator(metaclass=Singleton):
     
     def __init__(
         self,

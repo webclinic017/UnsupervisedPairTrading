@@ -4,14 +4,11 @@ from sklearn.preprocessing import StandardScaler
 from datetime import date
 
 from PairTrading.lib.dataEngine import AlpacaDataClient
+from PairTrading.util import Singleton
 
-class PairCreator:
-    _instance = None 
-    # pair creator implements the singleton pattern
-    def __new__(cls, clusterDF:DataFrame, dataClient:AlpacaDataClient):
-        if cls._instance is None:
-            cls._instance = super(PairCreator, cls).__new__(PairCreator)
-        return cls._instance
+
+
+class PairCreator(metaclass=Singleton):
     
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         self.clusterDF:DataFrame = clusterDF

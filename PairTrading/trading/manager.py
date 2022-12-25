@@ -2,6 +2,7 @@ from PairTrading.lib.tradingClient import AlpacaTradingClient
 from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.read import readFromJson, getRecentlyClosed, getTradingRecord, getPairsFromTrainingJson
 from PairTrading.util.write import writeToJson, dumpRecentlyClosed, dumpTradingRecord
+from PairTrading.util import Singleton
 from PairTrading.trading.helper import PairInfoRetriever
 from PairTrading.authentication import AlpacaAuth
 
@@ -15,12 +16,7 @@ from datetime import date, datetime
 logger = logging.getLogger(__name__)
 
 
-class TradingManager:
-    _instance = None 
-    def __new__(cls, tradingClient:AlpacaTradingClient, dataClient:AlpacaDataClient, entryPercent:float):
-        if not cls._instance:
-            cls._instance = super(TradingManager, cls).__new__(TradingManager)
-        return cls._instance 
+class TradingManager(metaclass=Singleton):
     
     def __init__(self, tradingClient:AlpacaTradingClient, dataClient:AlpacaDataClient, entryPercent:float):
         self.tradingClient:AlpacaTradingClient = tradingClient

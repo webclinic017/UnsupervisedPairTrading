@@ -1,17 +1,13 @@
 from PairTrading.lib import AlpacaTradingClient
 from PairTrading.util.read import getRecentlyClosed, getPairsFromTrainingJson
 from PairTrading.util.write import dumpRecentlyClosed
+from PairTrading.util import Singleton
 
 from alpaca.trading.models import Position
 
 from datetime import date 
 
-class PairInfoRetriever: 
-    _instance = None 
-    def __new__(cls, tradingClient:AlpacaTradingClient):
-        if not cls._instance:
-            cls._instance = super(PairInfoRetriever, cls).__new__(PairInfoRetriever)
-        return cls._instance 
+class PairInfoRetriever(metaclass=Singleton): 
     
     def __init__(
         self,
