@@ -44,7 +44,7 @@ def getTrainAssign(alpacaAuth, eodAuth:BaseAuth, useExistingFile:bool=True) -> N
     today:str = date.today().strftime("%Y-%m-%d")
     pairCreator = PairCreator.create(clusters, dataClient)
     res:dict = {"time": today}
-    res:dict = pairCreator.getFinalPairs()
+    res:dict = pairCreator.getFinalPairs(res)
     
     writeToJson(res, "saveddata/pairs/pairs.json")
 
