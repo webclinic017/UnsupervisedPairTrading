@@ -6,13 +6,13 @@ from alpaca.data.enums import Adjustment, DataFeed
 from PairTrading.authentication.auth import AlpacaAuth
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.lib.dataEngine.common import BarCollection
-from PairTrading.util.patterns import Singleton
+from PairTrading.util.patterns import Singleton, Base
 
 import pandas as pd 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-class AlpacaDataClient(metaclass=Singleton):
+class AlpacaDataClient(Base, metaclass=Singleton):
     
     def __init__(self, auth:AlpacaAuth):
         self.dataClient:StockHistoricalDataClient = StockHistoricalDataClient(

@@ -1,9 +1,9 @@
 from eod import EodHistoricalData
 from PairTrading.authentication.base import BaseAuth
 from PairTrading.authentication.enums import ConfigType
-from PairTrading.util.patterns import Singleton
+from PairTrading.util.patterns import Singleton, Base 
 
-class EodDataClient(metaclass=Singleton):
+class EodDataClient(Base, metaclass=Singleton):
     
     def __init__(self, auth:BaseAuth):
         self.dataClient:EodHistoricalData = EodHistoricalData(auth.api_key)
