@@ -800,7 +800,7 @@ class FirmCharGetter(FundamentalsBase):
         
         return sales / cash
         
-    def getSaleInv(self) -> float:
+    def getSaleInv(self, initIndex:int=0) -> float:
         """
             saleinv -- Sales to inventory:
             Annual sales divided by total inventory
@@ -809,12 +809,20 @@ class FirmCharGetter(FundamentalsBase):
             arr1=self.incomeStatement, 
             arr2=self.balanceSheet, 
             feature1Name="totalRevenue", 
-            feature2Name="inventory")
+            feature2Name="inventory",
+            initIndex=initIndex)
         
         currYearRev:float = sum([float(self.incomeStatement[i]["totalRevenue"]) for i in iCurrRange])
         currYearInv:float = sum([float(self.balanceSheet[i]["inventory"]) for i in iCurrRange])
         
         return currYearRev / currYearInv
+    
+    def getPchSaleInv(self) -> float:
+        """
+            pchsaleinv -- Percent change in saleinv
+        """
+        return (self.getSaleInv() - self.getSaleInv(initIndex=4)) / self.getSaleInv(initIndex=4)
+        
         
     
     def getSaleRec(self) -> float:
@@ -1219,8 +1227,19 @@ class FirmCharGetter(FundamentalsBase):
         prevYearSga:float = sum([float(self.incomeStatement[i]["sellingGeneralAdministrative"]) for i in iPrevRange])
         
         return ((currYearSales-prevYearSales)/prevYearSales) - ((currYearSga-prevYearSga)/prevYearSga)
+    
+    def getRealEstate(self) -> float:
+        """
+            realestate -- Buildings and capitalized leases divided by gross PP&E.
+        """
+        iCurr:int = getFirstNonNullIndexPair(
+            arr1=self.balanceSheet, 
+            arr2=self.balanceSheet, 
+            feature1Name="capitalLeaseObligations", 
+            feature2Name="propertyPlantEquipment"
+        )
         
-        
+        return float(self.balanceSheet[iCurr]["capitalLeaseObligations"]) / float(self.balanceSheet[iCurr]["propertyPlantEquipment"])        
     
             
         
