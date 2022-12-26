@@ -800,6 +800,22 @@ class FirmCharGetter(FundamentalsBase):
         
         return sales / cash
         
+    def getSaleInv(self) -> float:
+        """
+            saleinv -- Sales to inventory:
+            Annual sales divided by total inventory
+        """
+        iCurrRange = getNonNullIndexRangePair(
+            arr1=self.incomeStatement, 
+            arr2=self.balanceSheet, 
+            feature1Name="totalRevenue", 
+            feature2Name="inventory")
+        
+        currYearRev:float = sum([float(self.incomeStatement[i]["totalRevenue"]) for i in iCurrRange])
+        currYearInv:float = sum([float(self.balanceSheet[i]["inventory"]) for i in iCurrRange])
+        
+        return currYearRev / currYearInv
+        
     
     def getSaleRec(self) -> float:
         """
@@ -1131,6 +1147,79 @@ class FirmCharGetter(FundamentalsBase):
             nincr = max(nincr, tmp)
         
         return nincr
+    
+    def getGrCAPX(self) -> float:
+        """
+            grCAPX:
+            Percent change in capital expenditures from year t-2 to year t.
+        """
+        iCurrRange:list = getNonNullIndexRange(
+            arr=self.cashFlow, 
+            featureName="capitalExpenditures"
+        )
+        iPrevRange:list = getNonNullIndexRange(
+            arr=self.cashFlow,
+            featureName="capitalExpenditures",
+            initIndex=8
+        )
+        
+        currCapExp:float = sum([float(self.cashFlow[i]["capitalExpenditures"]) for i in iCurrRange])
+        prevCapExp:float = sum([float(self.cashFlow[i]["capitalExpenditures"]) for i in iPrevRange])
+        
+        return (currCapExp - prevCapExp) / prevCapExp
+    
+    def getPchsalePchinvt(self) -> float:
+        """
+            pchsale_pchinvt:
+            Annual percent change in sales (sale) minus annual percent change in inventory (invt).
+        """
+        iCurrRange:list = getNonNullIndexRangePair(
+            arr1=self.incomeStatement, 
+            arr2=self.balanceSheet, 
+            feature1Name="totalRevenue", 
+            feature2Name="inventory"
+        ) 
+        iPrevRange:list = getNonNullIndexRangePair(
+            arr1=self.incomeStatement, 
+            arr2=self.balanceSheet, 
+            feature1Name="totalRevenue", 
+            feature2Name="inventory",
+            initIndex=iCurrRange[-1]+1
+        ) 
+        
+        currYearSales:float = sum([float(self.incomeStatement[i]["totalRevenue"]) for i in iCurrRange])
+        currYearInv:float = sum([float(self.balanceSheet[i]["inventory"]) for i in iCurrRange])
+        prevYearSales:float = sum([float(self.incomeStatement[i]["totalRevenue"]) for i in iPrevRange])
+        prevYearInv:float = sum([float(self.balanceSheet[i]["inventory"]) for i in iPrevRange])
+        
+        return ((currYearSales-prevYearSales)/prevYearSales) - ((currYearInv-prevYearInv)/prevYearInv)
+    
+    def getPchsalePchxsga(self) -> float:
+        """
+            pchsale_pchxsga:
+            Annual percent change in sales (sale) minus annual percent change in SG&A (xsga).
+        """
+        iCurrRange:list = getNonNullIndexRangePair(
+            arr1=self.incomeStatement, 
+            arr2=self.incomeStatement, 
+            feature1Name="totalRevenue", 
+            feature2Name="sellingGeneralAdministrative"
+        ) 
+        iPrevRange:list = getNonNullIndexRangePair(
+            arr1=self.incomeStatement, 
+            arr2=self.incomeStatement, 
+            feature1Name="totalRevenue", 
+            feature2Name="sellingGeneralAdministrative",
+            initIndex=iCurrRange[-1]+1
+        ) 
+        
+        currYearSales:float = sum([float(self.incomeStatement[i]["totalRevenue"]) for i in iCurrRange])
+        currYearSga:float = sum([float(self.incomeStatement[i]["sellingGeneralAdministrative"]) for i in iCurrRange])
+        prevYearSales:float = sum([float(self.incomeStatement[i]["totalRevenue"]) for i in iPrevRange])
+        prevYearSga:float = sum([float(self.incomeStatement[i]["sellingGeneralAdministrative"]) for i in iPrevRange])
+        
+        return ((currYearSales-prevYearSales)/prevYearSales) - ((currYearSga-prevYearSga)/prevYearSga)
+        
         
     
             
