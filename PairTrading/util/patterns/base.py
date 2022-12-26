@@ -1,7 +1,8 @@
-from abc import ABC
+from abc import ABCMeta, abstractclassmethod
 
-class Base(ABC):    
-    @classmethod   
+class Base(metaclass=ABCMeta):    
+    
+    @abstractclassmethod 
     def create(cls, *args, **kwargs):
         pass 
     

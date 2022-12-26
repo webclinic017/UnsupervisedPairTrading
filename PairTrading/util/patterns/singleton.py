@@ -1,6 +1,6 @@
-from PairTrading.util.patterns.base import Base
+from abc import ABCMeta
 
-class Singleton(type(Base)):
+class Singleton(ABCMeta):
     _instances = {}
     
     def __call__(cls, *args, **kwargs):
