@@ -37,7 +37,7 @@ if __name__ == "__main__":
     if (date.today().day==2 and not todayTrained) or REFRESH_DATA:
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
         logger.info(f"new training needs to be conducted -- {reason}")
-        getTrainAssign(alpacaAuth, eodAuth, False) 
+        getTrainAssign(alpacaAuth, eodAuth, True) 
         
     #initialize pair-creator 
     cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
