@@ -29,10 +29,10 @@ class PairCreator(Base, metaclass=Singleton):
             pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"]).flatten()
             pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"]).flatten()
             
-            if len(pair1DailyDF) != len(pair2DailyDF):
-                continue
+            minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
+            
 
-            priceRatio:array = pair1DailyDF/ pair2DailyDF
+            priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
                       
             if (priceRatio[-1] - priceRatio.mean()) / priceRatio.std() > 1:
                 tmpDict[",".join([pair1, pair2])] = ((priceRatio[-1] - priceRatio.mean()) / priceRatio.std(), priceRatio.mean())
