@@ -1,5 +1,5 @@
 from pandas import DataFrame, Series
-from numpy import array
+from numpy import array, dot
 from sklearn.preprocessing import StandardScaler
 from datetime import date
 
@@ -26,8 +26,9 @@ class PairCreator(Base, metaclass=Singleton):
         
         tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
-            pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"])
-            pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"])
+            pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"]).ravel()
+            pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"]).ravel()
+            
 
             priceRatio:array = pair1DailyDF/ pair2DailyDF
                       
