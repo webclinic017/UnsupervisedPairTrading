@@ -29,8 +29,8 @@ class PairCreator(Base, metaclass=Singleton):
             pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"]).flatten()
             pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"]).flatten()
             
-            print(pair1DailyDF)
-            print(pair2DailyDF)
+            if len(pair1DailyDF) != len(pair2DailyDF):
+                continue
 
             priceRatio:array = pair1DailyDF/ pair2DailyDF
                       
