@@ -57,7 +57,7 @@ class PairCreator(Base, metaclass=Singleton):
             head, tail = 0, len(clusterDF)-1
             while head < tail:
                 pairCandidates[f"{clusterDF.iloc[head].name},{clusterDF.iloc[tail].name}"] = \
-                abs(clusterDF.iloc[head].momentum - clusterDF.iloc[tail].momentum)
+                abs(clusterDF.iloc[head]["momentum"] - clusterDF.iloc[tail]["momentum"])
                 head += 1
                 tail -= 1
                 
