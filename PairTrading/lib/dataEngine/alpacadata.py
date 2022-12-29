@@ -71,6 +71,19 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df 
         
+    def getLongDaily(self, symbol:str) -> pd.DataFrame:
+        return self.dataClient.get_stock_bars(
+            StockBarsRequest(
+                symbol_or_symbols=symbol,
+                timeframe=TimeFrame.Day,
+                adjustment=Adjustment.ALL,
+                feed=DataFeed.SIP,
+                limit=90,
+                start=datetime.today() - relativedelta(days=90),
+                end=datetime.today()
+            )
+        ).df
+        
     def getAllBars(self, symbol:str) -> BarCollection:
         daily:pd.DataFrame = self.getDaily(symbol)
         weekly:pd.DataFrame = self.getWeekly(symbol)
