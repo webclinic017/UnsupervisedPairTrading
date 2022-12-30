@@ -30,18 +30,13 @@ class PairCreator(Base, metaclass=Singleton):
         for pair1, pair2 in viablePairs:
             pair1DailyDF:array = array(self.dataClient.getLongDaily(pair1)["close"]).flatten()
             pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()   
-            pair1DailyPrevDF:array = array(self.dataClient.getLongDaily(pair1, endDate=datetime.today() - relativedelta(days=90))["close"]).flatten()
-            pair2DailyPrevDF:array = array(self.dataClient.getLongDaily(pair2, endDate=datetime.today() - relativedelta(days=90))["close"]).flatten()  
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
-            minSizePrev:int = min(pair1DailyPrevDF.size, pair2DailyPrevDF.size)
             
             priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
-            priceRatioPrev:array = pair1DailyPrevDF[:minSize]/ pair2DailyPrevDF[:minSize]
             
             zscore = Series(priceRatio).sub(Series(priceRatio).rolling(30).mean().shift()).div(Series(priceRatio).rolling(30).std().shift()).to_numpy()
     
             if (CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and 
-                CointTest.isCointegrated(pair1DailyPrevDF[:minSizePrev], pair2DailyPrevDF[:minSizePrev]) and 
                 zscore[-1] > 1):
                 tmpDict[",".join([pair1, pair2])] = (zscore[-1], priceRatio.mean())
         for pair in list(tmpDict.keys()):
