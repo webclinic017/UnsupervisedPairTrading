@@ -3,6 +3,7 @@ from PairTrading.util.patterns.singleton import Singleton
 from pykalman import KalmanFilter
 from pandas import Series
 import numpy as np
+import statsmodels.api as sm
 
 class KalmanEngine(Base, metaclass=Singleton):
     
