@@ -83,7 +83,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df
         
-    def getLongDaily(self, symbol:str) -> pd.DataFrame:
+    def getLongDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
                 symbol_or_symbols=symbol,
@@ -91,8 +91,8 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 adjustment=Adjustment.ALL,
                 feed=DataFeed.SIP,
                 limit=90,
-                start=datetime.today() - relativedelta(days=90),
-                end=datetime.today()
+                start=endDate - relativedelta(days=90),
+                end=endDate
             )
         ).df
         
