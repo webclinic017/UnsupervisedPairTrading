@@ -1,6 +1,10 @@
 import json 
 from datetime import datetime, date
+import logging
 import os
+
+
+logger = logging.getLogger(__name__)
 
 def readFromJson(filePath:str) -> dict:
     res = {}
@@ -31,7 +35,7 @@ def getTradingRecord() -> dict[tuple, float]:
 def getPairsFromTrainingJson() -> dict:
     if not os.path.exists("saveddata/pairs/pairs.json"):
         logger.debug("pairs.json file does not exist")
-        return {}
+        return {"time":datetime.today().strftime("%Y-%m-%d")}
 
     pairs:dict = readFromJson("saveddata/pairs/pairs.json")
     pairs["final_pairs"]:dict = {(p.split(",")[0], p.split(",")[1]):val for p, val in pairs["final_pairs"].items()}
