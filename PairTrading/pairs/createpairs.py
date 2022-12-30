@@ -32,8 +32,9 @@ class PairCreator(Base, metaclass=Singleton):
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
             priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
-            if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]):
-                tmpDict[",".join([pair1, pair2])] = ((priceRatio[-1] - priceRatio.mean()) / priceRatio.std(), priceRatio.mean())
+            zscore:float = (priceRatio[-1] - priceRatio.mean()) / priceRatio.std()
+            if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and zscore > 1:
+                tmpDict[",".join([pair1, pair2])] = (zscore, priceRatio.mean())
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])
         res["final_pairs"] = finalPairs 
@@ -48,7 +49,7 @@ class PairCreator(Base, metaclass=Singleton):
         sc = StandardScaler()
         pairsDF:DataFrame = DataFrame(sc.fit_transform(pairData), index=pairCandidates.index, columns=["momentum_zscore"])     
         
-        return pairsDF.loc[pairsDF["momentum_zscore"] > 1].sort_values(by=["momentum_zscore"], ascending=False)
+        return pairsDF.sort_values(by=["momentum_zscore"], ascending=False)
                       
         
     def _formPairs(self) -> dict:
