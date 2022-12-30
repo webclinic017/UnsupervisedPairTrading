@@ -38,7 +38,7 @@ class PairInfoRetriever(metaclass=Singleton):
         for stock1, stock2 in pairs.keys():
             if stock1 in openedPositions or stock2 in openedPositions:
                 del res[(stock1, stock2)]
-            elif (date.today() - self.tradingClent.getPairOrders((stock1, stock2))[0].submitted_at.date()).days <= 30:
+            elif stock1 in self.recentlyClosedPositions or stock2 in self.recentlyClosedPositions:
                 del res[(stock1, stock2)]
         return res
     
