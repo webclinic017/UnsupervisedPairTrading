@@ -71,7 +71,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         )
         
         hr:Series = - stateMeans[:,0]
-        spread:Series = abs(y + (x * hr))
+        spread:Series = y + (x * hr)
         
         halfLife:int = self.__halfLife(spread)
         
