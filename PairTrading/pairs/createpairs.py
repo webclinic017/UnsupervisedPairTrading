@@ -5,6 +5,7 @@ from datetime import date
 
 from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.patterns import Singleton, Base
+from PairTrading.pairs.cointegration import CointTest
 
 
 
@@ -27,11 +28,11 @@ class PairCreator(Base, metaclass=Singleton):
         tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
             pair1DailyDF:array = array(self.dataClient.getLongDaily(pair1)["close"]).flatten()
-            pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()
-            
+            pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()           
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
+            
             priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
-            if priceRatio[-1] - priceRatio.mean() > 0:
+            if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]):
                 tmpDict[",".join([pair1, pair2])] = ((priceRatio[-1] - priceRatio.mean()) / priceRatio.std(), priceRatio.mean())
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])
@@ -47,7 +48,7 @@ class PairCreator(Base, metaclass=Singleton):
         sc = StandardScaler()
         pairsDF:DataFrame = DataFrame(sc.fit_transform(pairData), index=pairCandidates.index, columns=["momentum_zscore"])     
         
-        return pairsDF.loc[pairsDF["momentum_zscore"] > 1].sort_values(by=["momentum_zscore"], ascending=False)
+        return pairsDF.sort_values(by=["momentum_zscore"], ascending=False)
                       
         
     def _formPairs(self) -> dict:

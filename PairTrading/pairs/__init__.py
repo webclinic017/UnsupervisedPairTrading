@@ -1,1 +1,0 @@
-from .entryexit import model
