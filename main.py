@@ -37,13 +37,15 @@ if __name__ == "__main__":
     if (date.today().day==2 and not todayTrained) or REFRESH_DATA:
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
         logger.info(f"new training needs to be conducted -- {reason}")
-        getTrainAssign(alpacaAuth, eodAuth, False) 
+        getTrainAssign(alpacaAuth, eodAuth, True) 
         
-    #initialize pair-creator 
+    #initialize pair-creator
+    logger.info("initializing pair creator")
     cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
     pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
     
     # update viable pairs
+    logger.info("getting latest pairs")
     trainedPairs = getPairsFromTrainingJson()
     trainDate:date = datetime.strptime(trainedPairs["time"], "%Y-%m-%d").date()
     newPairs:dict = pairCreator.getFinalPairs(trainDate)
