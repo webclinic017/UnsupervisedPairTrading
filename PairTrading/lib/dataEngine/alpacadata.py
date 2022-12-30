@@ -58,7 +58,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df 
         
-    def getDaily(self, symbol:str) -> pd.DataFrame:
+    def getDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
                 symbol_or_symbols=symbol,
@@ -66,20 +66,20 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 adjustment=Adjustment.ALL,
                 feed=DataFeed.SIP,
                 limit=30,
-                start=datetime.today() - relativedelta(days=30),
-                end=datetime.today()
+                start=endDate - relativedelta(days=30),
+                end=endDate
             )
         ).df 
         
-    def getHourly(self, symbol:str) -> pd.DataFrame:
+    def getHourly(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
                 symbol_or_symbols=symbol,
                 timeframe=TimeFrame.Hour,
                 adjustment=Adjustment.ALL,
                 feed=DataFeed.SIP,
-                start=datetime.today() - relativedelta(days=30),
-                end=datetime.today()
+                start=endDate - relativedelta(days=30),
+                end=endDate
             )
         ).df
         

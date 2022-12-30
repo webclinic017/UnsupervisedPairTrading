@@ -27,14 +27,16 @@ class PairCreator(Base, metaclass=Singleton):
         
         tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
-            pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"]).flatten()
-            pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"]).flatten()           
+            pair1DailyDF:array = array(self.dataClient.getLongDaily(pair1)["close"]).flatten()
+            pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()           
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
             priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
-            zscore:float = (priceRatio[-1] - priceRatio.mean()) / priceRatio.std()
-            if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and zscore > 1:
+            
+            zscore = Series(priceRatio).sub(s.rolling(30).mean()).div(s.rolling(30).std())
+            if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and zscore[-1] > 1:
                 tmpDict[",".join([pair1, pair2])] = (zscore, priceRatio.mean())
+                print(zscore)
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])
         res["final_pairs"] = finalPairs 
