@@ -33,7 +33,7 @@ class PairCreator(Base, metaclass=Singleton):
             
             priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
             
-            zscore = Series(priceRatio).sub(s.rolling(30).mean()).div(s.rolling(30).std())
+            zscore = Series(priceRatio).sub(Series(priceRatio).rolling(30).mean()).div(Series(priceRatio).rolling(30).std())
             if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and zscore[-1] > 1:
                 tmpDict[",".join([pair1, pair2])] = (zscore, priceRatio.mean())
                 print(zscore)
