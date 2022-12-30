@@ -27,8 +27,8 @@ class PairCreator(Base, metaclass=Singleton):
         
         tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
-            pair1DailyDF:array = array(self.dataClient.getLongDaily(pair1)["close"]).flatten()
-            pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()           
+            pair1DailyDF:array = array(self.dataClient.getDaily(pair1)["close"]).flatten()
+            pair2DailyDF:array = array(self.dataClient.getDaily(pair2)["close"]).flatten()           
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
             priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
