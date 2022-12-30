@@ -5,7 +5,7 @@ from PairTrading.util.patterns import Singleton
 
 from alpaca.trading.models import Position
 
-from datetime import date 
+from datetime import date, datetime
 
 class PairInfoRetriever(metaclass=Singleton): 
     
@@ -37,6 +37,8 @@ class PairInfoRetriever(metaclass=Singleton):
         res:dict[tuple, list] = pairs.copy()
         for stock1, stock2 in pairs.keys():
             if stock1 in openedPositions or stock2 in openedPositions:
+                del res[(stock1, stock2)]
+            elif (date.today() - self.tradingClent.getPairOrders((stock1, stock2))[0].submitted_at.date()).days <= 30:
                 del res[(stock1, stock2)]
         return res
     
