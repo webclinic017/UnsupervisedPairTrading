@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.pairs.cointegration import CointTest
+from PairTrading.util.kalman import KalmanEngine
 
 
 
@@ -15,6 +16,7 @@ class PairCreator(Base, metaclass=Singleton):
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         self.clusterDF:DataFrame = clusterDF
         self.dataClient:AlpacaDataClient = dataClient
+        self.kf:KalmanEngine = KalmanEngine.create()
         
     @classmethod
     def create(cls, clusterDF:DataFrame, client:AlpacaDataClient):
@@ -32,13 +34,15 @@ class PairCreator(Base, metaclass=Singleton):
             pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()   
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
-            priceRatio:array = pair1DailyDF[:minSize]/ pair2DailyDF[:minSize]
-            
-            zscore = Series(priceRatio).sub(Series(priceRatio).rolling(30).mean().shift()).div(Series(priceRatio).rolling(30).std().shift()).to_numpy()
+            # generate entry signal with kalman filter
+            self.kf.fit(
+                x=Series(pair1DailyDF[:minSize]), 
+                y=Series(pair2DailyDF[:minSize])
+            )
     
             if (CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and 
-                zscore[-1] > 1):
-                tmpDict[",".join([pair1, pair2])] = (zscore[-1], priceRatio.mean())
+                self.kf.canEnter()):
+                tmpDict[",".join([pair1, pair2])] = self.kf.zscore
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])
         res["final_pairs"] = finalPairs 
