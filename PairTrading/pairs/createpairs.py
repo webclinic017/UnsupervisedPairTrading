@@ -1,7 +1,7 @@
 from pandas import DataFrame, Series
 from numpy import array, dot
 from sklearn.preprocessing import StandardScaler
-from datetime import date
+from datetime import date, datetime
 from dateutil import relativedelta
 
 from PairTrading.lib.dataEngine import AlpacaDataClient
