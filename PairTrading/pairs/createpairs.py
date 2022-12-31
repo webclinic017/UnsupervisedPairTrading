@@ -30,8 +30,8 @@ class PairCreator(Base, metaclass=Singleton):
         
         tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
-            pair1DailyDF:array = array(self.dataClient.getLongDaily(pair1)["close"]).flatten()
-            pair2DailyDF:array = array(self.dataClient.getLongDaily(pair2)["close"]).flatten()   
+            pair1DailyDF:array = self.dataClient.getLongDaily(pair1)["close"].to_numpy().flatten()
+            pair2DailyDF:array = self.dataClient.getLongDaily(pair2)["close"].to_numpy().flatten()   
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
             # generate entry signal with kalman filter
