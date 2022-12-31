@@ -30,7 +30,6 @@ class PairCreator(Base, metaclass=Singleton):
         
         tmpDict:dict = {}
         for pair1, pair2 in viablePairs:
-            print(pair1, pair2)
             pair1DailyDF:array = self.dataClient.getLongDaily(pair1)["close"].ravel()
             pair2DailyDF:array = self.dataClient.getLongDaily(pair2)["close"].ravel()
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)

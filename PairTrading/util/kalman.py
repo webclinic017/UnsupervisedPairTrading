@@ -19,7 +19,7 @@ class KalmanEngine(Base, metaclass=Singleton):
     
     @property
     def zscore(self) -> float:
-        return self.zscore
+        return self._zscore
     
     def _kalmanFilterAverage(self, x:Series) -> Series:
         # Construct a Kalman filter
