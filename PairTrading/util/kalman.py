@@ -11,7 +11,7 @@ class KalmanEngine(Base, metaclass=Singleton):
     exitZscore:float = 0
     
     def __init__(self):
-        self.__zscore:float = None
+        self._zscore:float = None
     
     @classmethod
     def create(cls):
@@ -21,7 +21,7 @@ class KalmanEngine(Base, metaclass=Singleton):
     def zscore(self) -> float:
         return self.zscore
     
-    def __kalmanFilterAverage(self, x:Series) -> Series:
+    def _kalmanFilterAverage(self, x:Series) -> Series:
         # Construct a Kalman filter
         kf = KalmanFilter(transition_matrices = [1],
         observation_matrices = [1],
@@ -35,7 +35,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         return state_means
     
     
-    def __kalmanFilterRegression(self, x,y:Series) -> tuple:
+    def _kalmanFilterRegression(self, x,y:Series) -> tuple:
         delta:float = 1e-3
         trans_cov = delta / (1 - delta) * np.eye(2) # How much random walk wiggles
         obs_mat = np.expand_dims(np.vstack([[x], [np.ones(len(x))]]).T, axis=1)
@@ -50,7 +50,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         state_means, state_covs = kf.filter(y.values)
         return state_means
     
-    def __halfLife(self, spread:Series) -> int:
+    def _halfLife(self, spread:Series) -> int:
         spread_lag = spread.shift(1)
         spread_lag.iloc[0] = spread_lag.iloc[1]
         spread_ret = spread - spread_lag
@@ -65,20 +65,24 @@ class KalmanEngine(Base, metaclass=Singleton):
     
     def fit(self, x, y:Series) -> None:
         
-        stateMeans:Series = self.__kalmanFilterRegression(
-            x=self.__kalmanFilterAverage(x), 
-            y=self.__kalmanFilterAverage(y)
+        x = x.reset_index()["close"]
+        y = y.reset_index()["close"]
+        
+        
+        stateMeans:Series = self._kalmanFilterRegression(
+            x=self._kalmanFilterAverage(x), 
+            y=self._kalmanFilterAverage(y)
         )
         
         hr:Series = - stateMeans[:,0]
         spread:Series = y + (x * hr)
         
-        halfLife:int = self.__halfLife(spread)
+        halfLife:int = self._halfLife(spread)
         
         meanSpread:float = spread.rolling(window=halfLife).mean()
         stdSpread:float = spread.rolling(window=halfLife).std()
         
-        self.__zscore = ((spread - meanSpread) / stdSpread)[-1]
+        self._zscore = ((spread - meanSpread) / stdSpread)[-1]
         
     def canEnter(self) -> bool:
         if not self.zscore:
