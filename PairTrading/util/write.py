@@ -18,8 +18,8 @@ def writeToJson(data:dict, filePath:str) -> bool:
         
 def dumpTradingRecord(record:dict[tuple, float]) -> None:
     res:dict[str, float] = {}
-    for pair, meanRatio in record.items():
-        res[",".join([pair[0], pair[1]])] = meanRatio
+    for pair, zscore in record.items():
+        res[",".join([pair[0], pair[1]])] = zscore
         
     writeToJson(res, "saveddata/openedpairs.json")
     

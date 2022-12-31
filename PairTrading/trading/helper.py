@@ -20,7 +20,7 @@ class PairInfoRetriever(metaclass=Singleton):
         return cls(tradingClient)
     
     @property 
-    def trainedPairs(self) -> dict[tuple, list]:
+    def trainedPairs(self) -> dict[tuple, float]:
         return getPairsFromTrainingJson()["final_pairs"]
         
     @property
@@ -31,10 +31,10 @@ class PairInfoRetriever(metaclass=Singleton):
     def recentlyClosedPositions(self, rec:dict[str, date]) -> None:
         dumpRecentlyClosed(rec)
     
-    def getTradablePairs(self, pairs:dict[tuple, list], openedPositions:dict[str, Position]) -> dict[tuple, list]:
+    def getTradablePairs(self, pairs:dict[tuple, float], openedPositions:dict[str, Position]) -> dict[tuple, list]:
         if not pairs:
             return None
-        res:dict[tuple, list] = pairs.copy()
+        res:dict[tuple, float] = pairs.copy()
         for stock1, stock2 in pairs.keys():
             if stock1 in openedPositions or stock2 in openedPositions:
                 del res[(stock1, stock2)]

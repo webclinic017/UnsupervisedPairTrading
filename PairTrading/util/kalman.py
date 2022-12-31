@@ -81,6 +81,9 @@ class KalmanEngine(Base, metaclass=Singleton):
         
         self._zscore = ((spread - meanSpread) / stdSpread).iloc[-1]
         
+    def reset(self) -> None:
+        self._zscore = None
+        
     def canEnter(self) -> bool:
         if not self.zscore:
             raise ValueError("current zscore hasn't been calculated")

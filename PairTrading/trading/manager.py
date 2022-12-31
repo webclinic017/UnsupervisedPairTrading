@@ -4,6 +4,7 @@ from PairTrading.util.read import readFromJson, getRecentlyClosed, getTradingRec
 from PairTrading.util.write import writeToJson, dumpRecentlyClosed, dumpTradingRecord
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.trading.helper import PairInfoRetriever
+from PairTrading.util.kalman import KalmanEngine
 from PairTrading.authentication import AlpacaAuth
 
 from alpaca.trading.models import TradeAccount, Position, Order
@@ -22,6 +23,7 @@ class TradingManager(Base, metaclass=Singleton):
         self.tradingClient:AlpacaTradingClient = tradingClient
         self.dataClient:AlpacaDataClient = dataClient
         self.pairInfoRetriever:PairInfoRetriever = PairInfoRetriever.create(tradingClient)
+        self.kalmanEngine:KalmanEngine = KalmanEngine.create()
         self.entryPercent:float = entryPercent
         
     @classmethod
@@ -113,7 +115,7 @@ class TradingManager(Base, metaclass=Singleton):
                     stockPair=(pair[0], pair[1]), 
                     shortQty=self._getShortableQty(pair[0], notionalAmount)
                 )           
-                tradingRecord[pair] = self.pairInfoRetriever.trainedPairs[pair][1]
+                tradingRecord[pair] = self.pairInfoRetriever.trainedPairs[pair]
                 logger.info(f"short {pair[0]} long {pair[1]} pair position opened")
                 self.tradingRecord = tradingRecord
                 executedTrades += 1
@@ -137,15 +139,20 @@ class TradingManager(Base, metaclass=Singleton):
             return
         
         for pair, positions in openedPairsPositions.items():
-            meanPriceRatio:float = openedPairs[pair]
-            currPriceRatio:float = float(positions[0].current_price) / float(positions[1].current_price)
-            logger.info(f"{pair[0]}--{pair[1]}: curr_ratio: {currPriceRatio}, mean_ratio: {meanPriceRatio}")
-            if currPriceRatio <= meanPriceRatio:
+            pair1 = self.dataClient.getHourly(pair[0])["close"].ravel()
+            pair2 = self.dataClient.getHourly(pair[1])["close"].ravel()
+            minSize:int = min(pair1.size, pair2.size)
+            
+            self.kalmanEngine.fit(Series(pair1[:minSize]), Series(pair2[:minSize]))
+            
+            logger.info(f"{pair[0]}--{pair[1]}: curr_zscore: {self.kalmanEngine.zscore}")
+            if self.kalmanEngine.canExit():
                 res.append(pair)
             else:   
                 ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
                 if (date.today() - ordersList[0].submitted_at.date()).days > 30:
                     res.append(pair)
+            self.kalmanEngine.reset()
                       
         return res 
     

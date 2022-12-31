@@ -28,8 +28,8 @@ def getTradingRecord() -> dict[tuple, float]:
         source:dict[str, float] = readFromJson("saveddata/openedpairs.json")       
         if not source:
             return {}
-        res:dict[tuple, float] = {(pair.split(",")[0], pair.split(",")[1]):meanRatio
-                                 for pair, meanRatio in source.items()}
+        res:dict[tuple, float] = {(pair.split(",")[0], pair.split(",")[1]):zscore
+                                 for pair, zscore in source.items()}
         return res 
     
 def getPairsFromTrainingJson() -> dict:
