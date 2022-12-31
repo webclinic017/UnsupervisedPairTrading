@@ -30,7 +30,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         observation_covariance=1,
         transition_covariance=.01)
         # Use the observed values of the price to get a rolling mean
-        state_means, _ = kf.filter(x.values)
+        state_means, _ = kf.filter(x.values.flatten())
         state_means = Series(state_means.flatten(), index=x.index)
         return state_means
     
