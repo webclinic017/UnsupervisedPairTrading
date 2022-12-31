@@ -65,8 +65,8 @@ class KalmanEngine(Base, metaclass=Singleton):
     
     def fit(self, x, y:Series) -> None:
         
-        x = x.reset_index()["close"]
-        y = y.reset_index()["close"]
+        x = x.reset_index()
+        y = y.reset_index()
         
         
         stateMeans:Series = self._kalmanFilterRegression(
