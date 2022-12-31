@@ -79,7 +79,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         meanSpread:float = spread.rolling(window=halfLife).mean()
         stdSpread:float = spread.rolling(window=halfLife).std()
         
-        self._zscore = ((spread - meanSpread) / stdSpread)[-1]
+        self._zscore = ((spread - meanSpread) / stdSpread).iloc[-1]
         
     def canEnter(self) -> bool:
         if not self.zscore:
