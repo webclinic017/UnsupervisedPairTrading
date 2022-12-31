@@ -11,7 +11,6 @@ from train import getTrainAssign
 import logging
 from pandas import DataFrame, read_csv
 from datetime import datetime, date
-from tqdm import tqdm
 import time
 import sys
 
