@@ -44,7 +44,7 @@ class PairCreator(Base, metaclass=Singleton):
                 self.kf.canEnter()):
                 tmpDict[",".join([pair1, pair2])] = self.kf.zscore
         for pair in list(tmpDict.keys()):
-            finalPairs[pair] = (tmpDict[pair][0], tmpDict[pair][1])
+            finalPairs[pair] = tmpDict[pair]
         res["final_pairs"] = finalPairs 
         return res
     
