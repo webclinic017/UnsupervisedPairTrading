@@ -56,6 +56,7 @@ class FeatureGenerator(metaclass=Singleton):
             priceData:DataFrame = self.alpacaClient.getMonthly(stock)
             
             # we will not consider stocks that have less than 4 years of data
+            print(priceData)
             if priceData.shape[0] < 49:
                 continue
             
