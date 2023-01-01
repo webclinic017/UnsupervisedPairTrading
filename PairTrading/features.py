@@ -60,7 +60,6 @@ class FeatureGenerator(metaclass=Singleton):
                 continue
             else:
                 priceData:DataFrame = priceData.iloc[priceData.shape[0]-49:]
-                print(priceData.shape[0])
             
             if useExistingFiles and f"{stock}.json" in storedStockList:
                 fundamentals:dict = readFromJson(f"saveddata/tmp/{stock}.json")
