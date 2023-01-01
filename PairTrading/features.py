@@ -56,33 +56,35 @@ class FeatureGenerator(metaclass=Singleton):
             priceData:DataFrame = self.alpacaClient.getMonthly(stock)
             
             # we will not consider stocks that have less than 4 years of data
-            print(priceData)
             if priceData.shape[0] < 49:
                 continue
+            else:
+                priceData:DataFrame = priceData.iloc[priceData.shape[0]-49:]
+                print(priceData.shape[0])
             
             if useExistingFiles and f"{stock}.json" in storedStockList:
                 fundamentals:dict = readFromJson(f"saveddata/tmp/{stock}.json")
             else:
                 fundamentals:dict = self.eodClient.getFundamentals(stock)
                        
-        # try:
-            # initialize generators
-            technicalsGenerator:TechnicalData = TechnicalData.create(priceData)
-            firmCharGenerator:FundamentalsData = FundamentalsData.create(fundamentals)
-            firmCharGenerator.setTechnicalBars(self.alpacaClient.getAllBars(stock))
-            
-            momentums:Series = technicalsGenerator.getMomentums()
-            firmChars:Series = firmCharGenerator.getFundamentals()
-            
-            combinedFeatures = DataFrame([momentums.append(firmChars).rename(stock)])
-            res = combinedFeatures if res.empty else concat([res, combinedFeatures])
-            
-            if writeToFile and f"{stock}.json" not in storedStockList:
-                if not os.path.exists("saveddata/tmp"):
-                    os.makedirs("saveddata/tmp")
-                writeToJson(fundamentals, f"saveddata/tmp/{stock}.json")           
-        # except:
-        #     continue
+            try:
+                # initialize generators
+                technicalsGenerator:TechnicalData = TechnicalData.create(priceData)
+                firmCharGenerator:FundamentalsData = FundamentalsData.create(fundamentals)
+                firmCharGenerator.setTechnicalBars(self.alpacaClient.getAllBars(stock))
+                
+                momentums:Series = technicalsGenerator.getMomentums()
+                firmChars:Series = firmCharGenerator.getFundamentals()
+                
+                combinedFeatures = DataFrame([momentums.append(firmChars).rename(stock)])
+                res = combinedFeatures if res.empty else concat([res, combinedFeatures])
+                
+                if writeToFile and f"{stock}.json" not in storedStockList:
+                    if not os.path.exists("saveddata/tmp"):
+                        os.makedirs("saveddata/tmp")
+                    writeToJson(fundamentals, f"saveddata/tmp/{stock}.json")           
+            except:
+                continue
         
         res.replace([np.inf, -np.inf], np.nan, inplace=True)
         res.fillna(0, inplace=True)

@@ -41,7 +41,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 adjustment=Adjustment.ALL,
                 limit=49,
                 feed=DataFeed.SIP,
-                start=datetime.today() - relativedelta(months=49),
+                start=datetime.today() - relativedelta(months=60),
                 end=datetime.today()
             )
         ).df 
