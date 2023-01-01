@@ -39,7 +39,6 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 symbol_or_symbols=symbol,
                 timeframe=TimeFrame.Month,
                 adjustment=Adjustment.ALL,
-                limit=49,
                 feed=DataFeed.SIP,
                 start=datetime.today() - relativedelta(months=60),
                 end=datetime.today()
