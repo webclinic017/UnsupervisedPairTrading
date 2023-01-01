@@ -49,6 +49,7 @@ class FeatureGenerator(metaclass=Singleton):
         if cleanOldData and not useExistingFiles:
             if os.path.exists("saveddata/tmp"):
                 shutil.rmtree("saveddata/tmp")
+                os.mkdir("saveddata/tmp")
                 
         
         for stock in tqdm(self.stocks, desc="calculate technical and fundamental features"):
