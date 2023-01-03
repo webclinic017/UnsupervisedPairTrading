@@ -25,6 +25,6 @@ def dumpTradingRecord(record:dict[tuple, float]) -> None:
     
 def dumpRecentlyClosed(recentlyClosed:dict[str, date]) -> None:
     for symbol, submitTime in recentlyClosed.items():
-        recentlyClosed[symbol] = submitTime.strftime("%Y-%m-%d")
+        recentlyClosed[symbol] = submitTime
         
     writeToJson(recentlyClosed, "saveddata/recently_closed.json")
