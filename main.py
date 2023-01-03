@@ -62,7 +62,8 @@ if __name__ == "__main__":
             logger.info("market is not open today")
             sys.exit()
         else:
-            time.sleep(10 * 60)
+            logger.info(f"anomaly... {timeTillMarketOpens/60} minutes before market opens")
+            time.sleep(60)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens            
 
     logger.info("the market is currently open")
