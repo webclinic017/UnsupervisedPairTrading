@@ -13,6 +13,7 @@ from alpaca.trading.models import TradeAccount, Position, Order
 import os
 import logging
 from datetime import date, datetime
+from pandas import Series
 
 logger = logging.getLogger(__name__)
 
