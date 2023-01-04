@@ -92,14 +92,10 @@ class KalmanEngine(Base, metaclass=Singleton):
         self._stdSpread = None 
         
     def canEnter(self, bidAskSpread:float) -> bool:
-        if self.zscore.empty:
-            raise ValueError("current zscore hasn't been calculated")
         
         return self.zscore.iloc[-1] > KalmanEngine.entryZscore and self._stdSpread > bidAskSpread * 10 
     
     def canExit(self) -> bool:
-        if self.zscore.empty:
-            raise ValueError("current zscore hasn't been calculated")
         
         return self.zscore.iloc[-1] < KalmanEngine.exitZscore 
         
