@@ -44,6 +44,9 @@ class PairCreator(Base, metaclass=Singleton):
             bidAskSpread = (self.dataClient.getAvgSpread(pair1) + self.dataClient.getAvgSpread(pair2)) / 2
             print(pair1, pair2)
             print(self.kf.zscore)
+            print(CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]))
+            print(self.kf.canEnter(bidAskSpread=bidAskSpread))
+            print(self.kf.zscore.iloc[-1])
             if (CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and self.kf.canEnter(bidAskSpread=bidAskSpread)):
                 tmpDict[",".join([pair1, pair2])] = self.kf.zscore.iloc[-1]
         for pair in list(tmpDict.keys()):
