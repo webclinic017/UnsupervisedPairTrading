@@ -21,7 +21,10 @@ class PairInfoRetriever(metaclass=Singleton):
     
     @property 
     def trainedPairs(self) -> dict[tuple, float]:
-        return getPairsFromTrainingJson()["final_pairs"]
+        res = getPairsFromTrainingJson()
+        if "final_pairs" in res.keys():
+            return res["final_pairs"]
+        return {}
         
     @property
     def recentlyClosedPositions(self) -> dict[str, date]:
