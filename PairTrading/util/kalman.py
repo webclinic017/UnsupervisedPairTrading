@@ -11,7 +11,7 @@ class KalmanEngine(Base, metaclass=Singleton):
     exitZscore:float = 0
     
     def __init__(self):
-        self._zscore:Series = None
+        self._zscore:Series = Series()
     
     @classmethod
     def create(cls):
@@ -82,16 +82,16 @@ class KalmanEngine(Base, metaclass=Singleton):
         self._zscore = ((spread - meanSpread) / stdSpread)
         
     def reset(self) -> None:
-        self._zscore = None
+        self._zscore = Series()
         
     def canEnter(self) -> bool:
-        if not self.zscore:
+        if self.zscore.empty:
             raise ValueError("current zscore hasn't been calculated")
         
         return self.zscore > KalmanEngine.entryZscore and self.zscore.shift(1) < KalmanEngine.entryZscore
     
     def canExit(self) -> bool:
-        if not self.zscore:
+        if self.zscore.empty:
             raise ValueError("current zscore hasn't been calculated")
         
         return self.zscore < KalmanEngine.exitZscore and self.zscore.shift(1) < KalmanEngine.entryZscore
