@@ -94,7 +94,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         if self.zscore.empty:
             raise ValueError("current zscore hasn't been calculated")
         
-        return self.zscore.iloc[-1] < KalmanEngine.exitZscore and self.zscore.shift(1).iloc[-1] > KalmanEngine.exitZscore
+        return self.zscore.iloc[-1] < KalmanEngine.exitZscore 
         
     
         
