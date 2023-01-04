@@ -88,13 +88,13 @@ class KalmanEngine(Base, metaclass=Singleton):
         if self.zscore.empty:
             raise ValueError("current zscore hasn't been calculated")
         
-        return self.zscore > KalmanEngine.entryZscore and self.zscore.shift(1) < KalmanEngine.entryZscore
+        return self.zscore.iloc[-1] > KalmanEngine.entryZscore and self.zscore.shift(1).iloc[-1] < KalmanEngine.entryZscore
     
     def canExit(self) -> bool:
         if self.zscore.empty:
             raise ValueError("current zscore hasn't been calculated")
         
-        return self.zscore < KalmanEngine.exitZscore and self.zscore.shift(1) < KalmanEngine.entryZscore
+        return self.zscore.iloc[-1] < KalmanEngine.exitZscore and self.zscore.shift(1).iloc[-1] < KalmanEngine.entryZscore
         
     
         
