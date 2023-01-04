@@ -48,6 +48,7 @@ if __name__ == "__main__":
     trainedPairs = getPairsFromTrainingJson()
     trainDate:date = datetime.strptime(trainedPairs["time"], "%Y-%m-%d").date()
     newPairs:dict = pairCreator.getFinalPairs(trainDate)
+    print(newPairs)
     writeToJson(newPairs, "saveddata/pairs/pairs.json")
     
     # initialize trading manager
