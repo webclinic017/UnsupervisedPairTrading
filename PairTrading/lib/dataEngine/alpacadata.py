@@ -1,5 +1,5 @@
 from alpaca.data.historical import StockHistoricalDataClient
-from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest
+from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest, StockQuotesRequest
 from alpaca.data.models import Quote
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
@@ -10,6 +10,7 @@ from PairTrading.util.patterns import Singleton, Base
 
 import pandas as pd 
 from datetime import datetime
+from numpy import array
 from dateutil.relativedelta import relativedelta
 
 class AlpacaDataClient(Base, metaclass=Singleton):
@@ -110,3 +111,17 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         )[symbol]
         
+    def getAvgSpread(self, symbol:str) -> float:
+        
+        quotes:list = self.dataClient.get_stock_quotes(
+            StockQuotesRequest(
+                symbol_or_symbols=symbol,
+                end=datetime.today(),
+                limit=1000,
+                feed=DataFeed.SIP
+            )
+        )[symbol]
+        
+        spreads = [abs(quote.bid_price-quote.ask_price)/quote.ask_price for quote in quotes]
+        
+        return array(spreads).mean()
