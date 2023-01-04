@@ -40,6 +40,8 @@ def getPairsFromTrainingJson() -> dict:
     pairs:dict = readFromJson("saveddata/pairs/pairs.json")
     if pairs:
         pairs["final_pairs"]:dict = {(p.split(",")[0], p.split(",")[1]):val for p, val in pairs["final_pairs"].items()}
+    else:
+        pairs = {"time":datetime.today().strftime("%Y-%m-%d")}
     
     return pairs 
         
