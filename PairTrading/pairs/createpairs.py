@@ -40,9 +40,13 @@ class PairCreator(Base, metaclass=Singleton):
                 x=Series(pair1DailyDF[:minSize]), 
                 y=Series(pair2DailyDF[:minSize])
             )
+            
+            quote0:Quote = self.dataClient.getLatestQuote(pair1)
+            quote1:Quote = self.dataClient.getLatestQuote(pair2)          
+            bidAskSpread = (abs(quote0.bid_price - quote0.ask_price)/quote0.ask_price + abs(quote1.bid_price - quote1.ask_price)/quote1.ask_price) / 2
     
             if (CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and 
-                self.kf.canEnter()):
+                self.kf.canEnter(bidAskSpread=bidAskSpread)):
                 tmpDict[",".join([pair1, pair2])] = self.kf.zscore.iloc[-1]
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]

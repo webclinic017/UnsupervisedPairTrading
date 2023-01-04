@@ -152,14 +152,9 @@ class TradingManager(Base, metaclass=Singleton):
             )
             
             currProfit:float = float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)
-            quote0:Quote = self.dataClient.getLatestQuote(pair[0])
-            quote1:Quote = self.dataClient.getLatestQuote(pair[0])
             
-            bidAskSpread = (abs(quote0.bid_price - quote0.ask_price)/quote0.ask_price + abs(quote1.bid_price - quote1.ask_price)/quote1.ask_price) / 2
-            
-            logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, bid_ask_spread: {bidAskSpread}, zscore: {self.kalmanEngine.zscore}")
-            if float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc) >= bidAskSpread*10 and \
-                self.kalmanEngine.canExit():
+            logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, zscore: {self.kalmanEngine.zscore}")
+            if self.kalmanEngine.canExit():
                 res.append(pair)
             else:   
                 ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
