@@ -140,19 +140,16 @@ class TradingManager(Base, metaclass=Singleton):
             return
         
         for pair, positions in openedPairsPositions.items():
-            pair1 = self.dataClient.getHourly(pair[0])["close"].ravel()
-            pair2 = self.dataClient.getHourly(pair[1])["close"].ravel()
-            minSize:int = min(pair1.size, pair2.size)            
-            self.kalmanEngine.fit(Series(pair1[:minSize]), Series(pair2[:minSize]))
             
-            logger.info(f"{pair[0]}--{pair[1]}: curr_zscore: {self.kalmanEngine.zscore.iloc[-1]}")
+            currProfit:float = float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)
+            
+            logger.info(f"{pair[0]}--{pair[1]}: curr_profit: {float(positions[0].unrealized_plpc)*100}% -- {float(positions[1].unrealized_plpc)*100}%")
             if float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc) > 0.05:
                 res.append(pair)
             else:   
                 ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
                 if (date.today() - ordersList[0].submitted_at.date()).days > 30:
                     res.append(pair)
-            self.kalmanEngine.reset()
                       
         return res 
     
