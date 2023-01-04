@@ -30,7 +30,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         observation_covariance=1,
         transition_covariance=.01)
         # Use the observed values of the price to get a rolling mean
-        state_means, _ = kf.filter(x.values.flatten())
+        state_means, _ = kf.filter(x.values)
         state_means = Series(state_means.flatten(), index=x.index)
         return state_means
     
@@ -58,7 +58,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         spread_lag2 = sm.add_constant(spread_lag)
         model = sm.OLS(spread_ret,spread_lag2)
         res = model.fit()
-        halflife = int(round(-np.log(2) / res.params[0],0))
+        halflife = int(round(-np.log(2) / res.params[1],0))
         if halflife <= 0:
             halflife = 1
         return halflife
