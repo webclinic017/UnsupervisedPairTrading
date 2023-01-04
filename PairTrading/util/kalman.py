@@ -7,7 +7,7 @@ import statsmodels.api as sm
 
 class KalmanEngine(Base, metaclass=Singleton):
     
-    entryZscore:float = 1.25
+    entryZscore:float = 1.15
     exitZscore:float = -0.08
     
     def __init__(self):
