@@ -8,6 +8,7 @@ from PairTrading.util.kalman import KalmanEngine
 from PairTrading.authentication import AlpacaAuth
 
 from alpaca.trading.models import TradeAccount, Position, Order
+from alpaca.data.models import Quote
 
 
 import os
@@ -141,16 +142,30 @@ class TradingManager(Base, metaclass=Singleton):
         
         for pair, positions in openedPairsPositions.items():
             
-            currProfit:float = float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)
+            pair1DailyDF:array = self.dataClient.getHourly(pair[0])["close"].ravel()
+            pair2DailyDF:array = self.dataClient.getHourly(pair[1])["close"].ravel()
+            minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
-            logger.info(f"{pair[0]}--{pair[1]}: curr_profit: {round(currProfit*100, 4)}%")
-            if float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc) >= 0.1:
+            self.kalmanEngine.fit(
+                x=Series(pair1DailyDF[:minSize]), 
+                y=Series(pair2DailyDF[:minSize])
+            )
+            
+            currProfit:float = float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)
+            quote0:Quote = self.dataClient.getLatestQuote(pair[0])
+            quote1:Quote = self.dataClient.getLatestQuote(pair[0])
+            
+            bidAskSpread = (abs(quote0.bid_price - quote0.ask_price)/quote0.ask_price + abs(quote1.bid_price - quote1.ask_price)/quote1.ask_price) / 2
+            
+            logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, bid_ask_spread: {bidAskSpread}")
+            if float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc) >= bidAskSpread*10 and \
+                self.kalmanEngine.canExit():
                 res.append(pair)
             else:   
                 ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
                 if (date.today() - ordersList[0].submitted_at.date()).days > 30:
                     res.append(pair)
-                      
+            self.kalmanEngine.reset()
         return res 
     
     def closePositions(self) -> bool:
