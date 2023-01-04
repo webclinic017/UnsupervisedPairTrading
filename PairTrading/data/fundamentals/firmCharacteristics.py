@@ -287,6 +287,20 @@ class FirmCharGetter(FundamentalsBase):
         
         return rd 
     
+    def getRdMve(self) -> float:
+        """
+            rd_mve: R&D expense divided by end-of-fiscal-year market capitalization
+        """
+        iCurrRange:list = getNonNullIndexRange(
+            arr=self.incomeStatement,
+            featureName="researchDevelopment"
+        )
+        
+        marketCap:float = self.highlights["MarketCapitalization"]
+        rd:float = sum([float(self.incomeStatement[i]["researchDevelopment"]) for i in iCurrRange])
+        
+        return rd / marketCap
+    
     def getChtx(self) -> float:
         """
             chtx -- Change in tax expense:
