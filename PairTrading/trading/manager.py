@@ -146,7 +146,7 @@ class TradingManager(Base, metaclass=Singleton):
             
             self.kalmanEngine.fit(Series(pair1[:minSize]), Series(pair2[:minSize]))
             
-            logger.info(f"{pair[0]}--{pair[1]}: curr_zscore: {self.kalmanEngine.zscore}")
+            logger.info(f"{pair[0]}--{pair[1]}: curr_zscore: {self.kalmanEngine.zscore.iloc[-1]}")
             if self.kalmanEngine.canExit():
                 res.append(pair)
             else:   
