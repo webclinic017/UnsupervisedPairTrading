@@ -93,7 +93,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         
     def canEnter(self, bidAskSpread:float) -> bool:
         
-        return self.zscore.iloc[-1] > KalmanEngine.entryZscore and self._stdSpread > bidAskSpread * 10 
+        return self._zscore.iloc[-1] > KalmanEngine.entryZscore and self._stdSpread > bidAskSpread * 10 
     
     def canExit(self) -> bool:
         
