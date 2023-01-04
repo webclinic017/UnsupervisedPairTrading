@@ -7,8 +7,8 @@ import statsmodels.api as sm
 
 class KalmanEngine(Base, metaclass=Singleton):
     
-    entryZscore:float = 1 
-    exitZscore:float = 0
+    entryZscore:float = 1.25
+    exitZscore:float = -0.08
     
     def __init__(self):
         self._zscore:Series = Series()
@@ -58,7 +58,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         spread_lag2 = sm.add_constant(spread_lag)
         model = sm.OLS(spread_ret,spread_lag2)
         res = model.fit()
-        halflife = int(round(-np.log(2) / res.params[1],0))
+        halflife = int(round(-np.log(2) / res.params[0],0))
         if halflife <= 0:
             halflife = 1
         return halflife
@@ -94,7 +94,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         if self.zscore.empty:
             raise ValueError("current zscore hasn't been calculated")
         
-        return self.zscore.iloc[-1] < KalmanEngine.exitZscore and self.zscore.shift(1).iloc[-1] < KalmanEngine.exitZscore
+        return self.zscore.iloc[-1] < KalmanEngine.exitZscore and self.zscore.shift(1).iloc[-1] > KalmanEngine.exitZscore
         
     
         
