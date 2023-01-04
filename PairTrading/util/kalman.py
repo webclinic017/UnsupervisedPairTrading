@@ -11,14 +11,14 @@ class KalmanEngine(Base, metaclass=Singleton):
     exitZscore:float = 0
     
     def __init__(self):
-        self._zscore:float = None
+        self._zscore:Series = None
     
     @classmethod
     def create(cls):
         return cls()
     
     @property
-    def zscore(self) -> float:
+    def zscore(self) -> Series:
         return self._zscore
     
     def _kalmanFilterAverage(self, x:Series) -> Series:
@@ -79,7 +79,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         meanSpread:float = spread.rolling(window=halfLife).mean()
         stdSpread:float = spread.rolling(window=halfLife).std()
         
-        self._zscore = ((spread - meanSpread) / stdSpread).iloc[-1]
+        self._zscore = ((spread - meanSpread) / stdSpread)
         
     def reset(self) -> None:
         self._zscore = None
@@ -88,13 +88,13 @@ class KalmanEngine(Base, metaclass=Singleton):
         if not self.zscore:
             raise ValueError("current zscore hasn't been calculated")
         
-        return self.zscore > KalmanEngine.entryZscore
+        return self.zscore > KalmanEngine.entryZscore and self.zscore.shift(1) < KalmanEngine.entryZscore
     
     def canExit(self) -> bool:
         if not self.zscore:
             raise ValueError("current zscore hasn't been calculated")
         
-        return self.zscore < KalmanEngine.exitZscore
+        return self.zscore < KalmanEngine.exitZscore and self.zscore.shift(1) < KalmanEngine.entryZscore
         
     
         
