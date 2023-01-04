@@ -49,6 +49,7 @@ class PairCreator(Base, metaclass=Singleton):
             print(self.kf.zscore.iloc[-1])
             if (CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and self.kf.canEnter(bidAskSpread=bidAskSpread)):
                 tmpDict[",".join([pair1, pair2])] = self.kf.zscore.iloc[-1]
+            self.kf.reset()
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]
         res["final_pairs"] = finalPairs 
