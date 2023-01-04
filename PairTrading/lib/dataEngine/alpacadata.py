@@ -122,6 +122,6 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         )[symbol]
         
-        spreads = [abs(quote.bid_price-quote.ask_price)/quote.ask_price for quote in quotes]
+        spreads = [abs(quote.bid_price-quote.ask_price)/quote.ask_price for quote in quotes if quote.ask_price != 0]
         
         return array(spreads).mean()
