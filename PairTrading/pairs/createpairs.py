@@ -29,13 +29,13 @@ class PairCreator(Base, metaclass=Singleton):
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in pairsDF.index]
         
         tmpDict:dict = {}
-        for pair1, pair2 in tqdm(viablePairs, desc="finalize on enterable pairs"):
-            pair1DailyDF:array = self.dataClient.getHourly(pair1)["close"].ravel()
-            pair2DailyDF:array = self.dataClient.getHourly(pair2)["close"].ravel()
+        for pair in tqdm(viablePairs, desc="finalize on enterable pairs"):
+            pair1DailyDF:array = self.dataClient.getHourly(pair[0])["close"].ravel()
+            pair2DailyDF:array = self.dataClient.getHourly(pair[1])["close"].ravel()
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
             if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]):
-                tmpDict[",".join([pair1, pair2])] = pairsDF[(pair1, pair2)]
+                tmpDict[",".join(pair)] = pairsDF.loc[",".join(pair)]["momentum_zscore"]
                 
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]
