@@ -54,7 +54,6 @@ if __name__ == "__main__":
     manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)
     
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
-    print(timeTillMarketOpens)
     while not manager.tradingClient.clock.is_open:
         if 0 < timeTillMarketOpens <= 3600 * 8:
             logger.info("waiting for market to open")
