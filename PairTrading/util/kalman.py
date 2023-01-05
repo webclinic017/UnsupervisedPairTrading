@@ -84,7 +84,7 @@ class KalmanEngine(Base, metaclass=Singleton):
         meanSpread:float = spread.rolling(window=halfLife).mean()
         stdSpread:float = spread.rolling(window=halfLife).std()
         
-        self._stdSpread = abs(stdSpread)
+        self._stdSpread = abs(stdSpread.iloc[-1])
         self._zscore = ((spread - meanSpread) / stdSpread)
         
     def reset(self) -> None:

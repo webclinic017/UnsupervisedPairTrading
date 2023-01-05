@@ -4,7 +4,6 @@ from PairTrading.util.read import readFromJson, getRecentlyClosed, getTradingRec
 from PairTrading.util.write import writeToJson, dumpRecentlyClosed, dumpTradingRecord
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.trading.helper import PairInfoRetriever
-from PairTrading.util.kalman import KalmanEngine
 from PairTrading.authentication import AlpacaAuth
 
 from alpaca.trading.models import TradeAccount, Position, Order
@@ -25,7 +24,6 @@ class TradingManager(Base, metaclass=Singleton):
         self.tradingClient:AlpacaTradingClient = tradingClient
         self.dataClient:AlpacaDataClient = dataClient
         self.pairInfoRetriever:PairInfoRetriever = PairInfoRetriever.create(tradingClient)
-        self.kalmanEngine:KalmanEngine = KalmanEngine.create()
         self.entryPercent:float = entryPercent
         
     @classmethod
@@ -142,25 +140,15 @@ class TradingManager(Base, metaclass=Singleton):
         
         for pair, positions in openedPairsPositions.items():
             
-            pair1DailyDF:array = self.dataClient.getHourly(pair[0])["close"].ravel()
-            pair2DailyDF:array = self.dataClient.getHourly(pair[1])["close"].ravel()
-            minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
-            
-            self.kalmanEngine.fit(
-                x=Series(pair1DailyDF[:minSize]), 
-                y=Series(pair2DailyDF[:minSize])
-            )
-            
             currProfit:float = float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)
             
-            logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, zscore: {self.kalmanEngine.zscore}")
-            if self.kalmanEngine.canExit():
+            logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%")
+            if currProfit >= 0.1:
                 res.append(pair)
             else:   
                 ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
                 if (date.today() - ordersList[0].submitted_at.date()).days > 30:
                     res.append(pair)
-            self.kalmanEngine.reset()
         return res 
     
     def closePositions(self) -> bool:

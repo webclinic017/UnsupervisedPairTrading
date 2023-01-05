@@ -8,7 +8,7 @@ from tqdm import tqdm
 from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.pairs.cointegration import CointTest
-from PairTrading.util.kalman import KalmanEngine
+
 
 
 
@@ -17,7 +17,6 @@ class PairCreator(Base, metaclass=Singleton):
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         self.clusterDF:DataFrame = clusterDF
         self.dataClient:AlpacaDataClient = dataClient
-        self.kf:KalmanEngine = KalmanEngine.create()
         
     @classmethod
     def create(cls, clusterDF:DataFrame, client:AlpacaDataClient):
@@ -35,21 +34,9 @@ class PairCreator(Base, metaclass=Singleton):
             pair2DailyDF:array = self.dataClient.getHourly(pair2)["close"].ravel()
             minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
             
-            # generate entry signal with kalman filter
-            self.kf.fit(
-                x=Series(pair1DailyDF[:minSize]), 
-                y=Series(pair2DailyDF[:minSize])
-            )
-      
-            bidAskSpread = (self.dataClient.getAvgSpread(pair1) + self.dataClient.getAvgSpread(pair2)) / 2
-            print(pair1, pair2)
-            print(self.kf.zscore)
-            print(CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]))
-            print(self.kf.canEnter(bidAskSpread=bidAskSpread))
-            print(self.kf.zscore.iloc[-1])
-            if (CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]) and self.kf.canEnter(bidAskSpread=bidAskSpread)):
-                tmpDict[",".join([pair1, pair2])] = self.kf.zscore.iloc[-1]
-            self.kf.reset()
+            if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]):
+                tmpDict[",".join([pair1, pair2])] = pairsDF[(pair1, pair2)]
+                
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]
         res["final_pairs"] = finalPairs 
@@ -64,7 +51,7 @@ class PairCreator(Base, metaclass=Singleton):
         sc = StandardScaler()
         pairsDF:DataFrame = DataFrame(sc.fit_transform(pairData), index=pairCandidates.index, columns=["momentum_zscore"])     
         
-        return pairsDF.sort_values(by=["momentum_zscore"], ascending=False)
+        return pairsDF.loc[pairsDF["momentum_zscore"] > 1].sort_values(by=["momentum_zscore"], ascending=False)
                       
         
     def _formPairs(self) -> dict:
