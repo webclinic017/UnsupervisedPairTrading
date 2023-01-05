@@ -140,7 +140,7 @@ class TradingManager(Base, metaclass=Singleton):
         
         for pair, positions in openedPairsPositions.items():
             
-            currProfit:float = float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)
+            currProfit:float = (float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)) / 2
             
             logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%")
             if currProfit >= 0.1:
