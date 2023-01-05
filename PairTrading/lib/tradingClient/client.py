@@ -37,7 +37,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         if clock.is_open:
             return 0
         
-        return int((clock.next_open.replace(tzinfo=None) - datetime.now()).total_seconds())
+        return int((clock.next_open.replace(tzinfo=None) - datetime.now().replace(tzinfo=None)).total_seconds())
     
     
     def getViableStocks(self) -> list[str]:
