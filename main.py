@@ -4,6 +4,7 @@ from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.authentication.auth import AlpacaAuth, EodAuth
 from PairTrading.authentication.authLoader import getAuth
 from PairTrading.pairs.createpairs import PairCreator
+from config.configloader import configLoader
 
 from alpaca.trading.models import Order
 
@@ -17,6 +18,8 @@ import sys
 ENTRY_PERCENT = 0.4
 REFRESH_DATA = False
 
+config = configLoader()
+print(config)
 
 if __name__ == "__main__":
     # logging.basicConfig(filename="saveddata/log/trading.log", filemode="w", format="%(asctime)s - %(message)s", level=logging.INFO)   
@@ -27,16 +30,16 @@ if __name__ == "__main__":
     cleanClosedTrades()
     
     # initialize authentication objects 
-    alpacaAuth:AlpacaAuth = getAuth("alpaca")
+    alpacaAuth:AlpacaAuth = getAuth("alpaca", config.IS_PAPER)
     eodAuth:EodAuth = getAuth("eod")
     # get recently trained final pairs data 
     pairsDict:dict = getPairsFromTrainingJson()
     
     todayTrained:bool = (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days == 0
-    if (date.today().day==2 and not todayTrained) or REFRESH_DATA:
+    if (date.today().day==2 and not todayTrained) or config.REFRESH_DATA:
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
         logger.info(f"new training needs to be conducted -- {reason}")
-        getTrainAssign(alpacaAuth, eodAuth, True) 
+        getTrainAssign(alpacaAuth, eodAuth, config.OVERWRITE_FUNDAMENTALS) 
         
     #initialize pair-creator
     logger.info("initializing pair creator")
@@ -62,7 +65,7 @@ if __name__ == "__main__":
             logger.info("market is not open today")
             sys.exit()
         else:
-            logger.info(f"anomaly... {timeTillMarketOpens/60} minutes before market opens")
+            logger.info(f"anomaly... {round(timeTillMarketOpens/60, 2)} minutes before market opens")
             time.sleep(600)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens            
 

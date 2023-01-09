@@ -1,0 +1,4 @@
+entry_percent: 0.4 
+refresh_data: false 
+overwrite_fundamentals: true
+is_paper: true 
