@@ -9,5 +9,5 @@ class Config:
     IS_PAPER: bool 
     
     def __repr__(self):
-        return asdict(self)
+        return str(asdict(self))
     
