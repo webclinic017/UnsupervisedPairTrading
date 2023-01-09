@@ -1,5 +1,5 @@
 import yaml 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 @dataclass(frozen=True) 
 class Config:
@@ -9,5 +9,5 @@ class Config:
     IS_PAPER: bool 
     
     def __repr__(self):
-        return self.asdict()
+        return asdict(self)
     
