@@ -3,7 +3,6 @@ from numpy import array, dot
 from sklearn.preprocessing import StandardScaler
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-from tqdm import tqdm
 
 from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.patterns import Singleton, Base
@@ -29,15 +28,8 @@ class PairCreator(Base, metaclass=Singleton):
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in pairsDF.index]
         
         tmpDict:dict = {}
-        for pair in tqdm(viablePairs, desc="finalize on enterable pairs"):
-            
+        for pair in viablePairs:           
             tmpDict[",".join(pair)] = pairsDF.loc[",".join(pair)]["momentum_zscore"]
-            # pair1DailyDF:array = self.dataClient.getDaily(pair[0])["close"].ravel()
-            # pair2DailyDF:array = self.dataClient.getDaily(pair[1])["close"].ravel()
-            # minSize:int = min(pair1DailyDF.size, pair2DailyDF.size)
-            
-            # if CointTest.isCointegrated(pair1DailyDF[:minSize], pair2DailyDF[:minSize]):
-            #     tmpDict[",".join(pair)] = pairsDF.loc[",".join(pair)]["momentum_zscore"]
                 
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]
