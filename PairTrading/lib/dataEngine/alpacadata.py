@@ -88,8 +88,8 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             StockLatestBarRequest(
                 symbol_or_symbols=symbol,
                 feed=DataFeed.SIP
-            ).close
-        )
+            )
+        )[symbol].close
         
     def getLongDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
