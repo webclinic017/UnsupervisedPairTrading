@@ -18,13 +18,14 @@ class PairCreator(Base, metaclass=Singleton):
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         self.clusterDF:DataFrame = clusterDF
         self.dataClient:AlpacaDataClient = dataClient
-        self._getMomentum()
+        
         
     @classmethod
     def create(cls, clusterDF:DataFrame, client:AlpacaDataClient):
         return cls(clusterDF, client)
     
     def getFinalPairs(self, trainDate:date) -> dict[str, list]:
+        self._getMomentum()
         res = {"time": trainDate.strftime("%Y-%m-%d")}
         finalPairs:dict = {}
         pairsDF:DataFrame = self._getTradeablePairs()
