@@ -83,6 +83,3 @@ if __name__ == "__main__":
             logger.info("new pairs created")
         time.sleep(60*5) # sleep for 5 minutes
         
-        # update viable pairs
-        newPairs:dict = pairCreator.getFinalPairs(trainDate)
-        writeToJson(newPairs, "saveddata/pairs/pairs.json")
