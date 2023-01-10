@@ -1,5 +1,5 @@
 from alpaca.data.historical import StockHistoricalDataClient
-from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest, StockQuotesRequest
+from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest, StockQuotesRequest, StockLatestBarRequest
 from alpaca.data.models import Quote
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
@@ -82,6 +82,14 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 end=endDate
             )
         ).df
+        
+    def getLastMinute(self, symbol:str) -> float:
+        return self.dataClient.get_stock_latest_bar(
+            StockLatestBarRequest(
+                symbol_or_symbols=symbol,
+                feed=DataFeed.SIP
+            ).close
+        )
         
     def getLongDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
