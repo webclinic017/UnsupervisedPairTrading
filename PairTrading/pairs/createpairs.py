@@ -8,6 +8,8 @@ from PairTrading.lib.dataEngine import AlpacaDataClient
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.pairs.cointegration import CointTest
 
+from tqdm import tqdm
+
 
 
 
@@ -16,6 +18,7 @@ class PairCreator(Base, metaclass=Singleton):
     def __init__(self, clusterDF:DataFrame, dataClient:AlpacaDataClient):
         self.clusterDF:DataFrame = clusterDF
         self.dataClient:AlpacaDataClient = dataClient
+        self._getMomentum()
         
     @classmethod
     def create(cls, clusterDF:DataFrame, client:AlpacaDataClient):
@@ -60,4 +63,10 @@ class PairCreator(Base, metaclass=Singleton):
                 tail -= 1
                 
         return pairCandidates
+    
+    def _getMomentum(self) -> None:
+        for stock in tqdm(self.clusterDF.index, desc="get latest momentum data"):
+            currPrice:float = self.dataClient.getDaily(stock).iloc[-1]["close"]
+            prevPrice:float = self.dataClient.getMonthly(stock).iloc[-2]["close"]            
+            self.clusterDF.loc[stock]["momentum"] = (currPrice - prevPrice) / prevPrice
     
