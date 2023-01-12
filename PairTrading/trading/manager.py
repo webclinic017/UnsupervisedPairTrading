@@ -144,7 +144,7 @@ class TradingManager(Base, metaclass=Singleton):
             ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
             daysElapsed:int = (date.today() - ordersList[0].submitted_at.date()).days
             logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}")
-            if currProfit >= 0.1:
+            if currProfit > 0.1 or currProfit < -0.1:
                 res.append(pair)
             else:                 
                 if daysElapsed > 30:
