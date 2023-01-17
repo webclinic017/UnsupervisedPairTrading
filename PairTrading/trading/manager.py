@@ -45,8 +45,9 @@ class TradingManager(Base, metaclass=Singleton):
         dumpTradingRecord(rec)
          
     def _getShortableQty(self, symbol:str, notionalAmount) -> float:
-        latestBidPrice:float = self.dataClient.getLatestQuote(symbol).bid_price
-        rawQty:float = notionalAmount // latestBidPrice
+        
+        latestPrice:float = self.dataClient.getLastMinute(symbol)
+        rawQty:float = notionalAmount // latestPrice
         offset:float = (rawQty % 100) if (rawQty % 100) >= 50 else 0
         return ((rawQty // 100) * 100) + offset
     
