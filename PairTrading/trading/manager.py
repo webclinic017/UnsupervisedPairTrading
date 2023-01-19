@@ -70,7 +70,7 @@ class TradingManager(Base, metaclass=Singleton):
             for stock, position in currOpenedPositions.items():
                 tmp.append(abs(float(position.avg_entry_price) * float(position.qty)))
             tmp:np.array = np.array(tmp)
-            avgEntryAmount = ((tmp.sum() / len(currOpenedPositions)) + tmp.max()) / 2
+            avgEntryAmount = tmp.max() / 2
             res = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount))
         else:
             tradingNum:int = len(tradingPairs)
@@ -102,7 +102,8 @@ class TradingManager(Base, metaclass=Singleton):
         availableCash:float = (float(tradingAccount.cash) * self.entryPercent - totalPosition) / 2
         logger.info(f"available cash: ${round(availableCash, 2)*2}")
         
-        tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)           
+        tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)          
+        print(tradeNums, notionalAmount) 
         if tradeNums < 1:
             logger.info("No more trades can be placed currently")
             return 
@@ -122,7 +123,8 @@ class TradingManager(Base, metaclass=Singleton):
                 logger.info(f"short {pair[0]} long {pair[1]} pair position opened")
                 self.tradingRecord = tradingRecord
                 executedTrades += 1
-            except:
+            except Exception as ex:
+                print(ex)
                 continue
         
             
