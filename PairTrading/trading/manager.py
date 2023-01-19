@@ -82,7 +82,7 @@ class TradingManager(Base, metaclass=Singleton):
         
         if res > len(tradingPairs):
             res = len(tradingPairs)
-            avgEntryAmount = availableCash / res 
+        avgEntryAmount = availableCash / res 
         return (res, avgEntryAmount)
                   
     
