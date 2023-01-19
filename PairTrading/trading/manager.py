@@ -12,6 +12,7 @@ from alpaca.data.models import Quote
 
 import os
 import logging
+import numpy as np 
 from datetime import date, datetime
 from pandas import Series
 
@@ -65,10 +66,11 @@ class TradingManager(Base, metaclass=Singleton):
             return (0, 0)
         res:int = 0
         if currOpenedPositions:           
-            tmp:float = 0
+            tmp:list = []
             for stock, position in currOpenedPositions.items():
-                tmp += abs(float(position.avg_entry_price) * float(position.qty))
-            avgEntryAmount = tmp / len(currOpenedPositions)
+                tmp.append(abs(float(position.avg_entry_price) * float(position.qty)))
+            tmp:np.array = np.array(tmp)
+            avgEntryAmount = ((tmp.sum() / len(currOpenedPositions)) + tmp.max()) / 2
             res = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount))
         else:
             tradingNum:int = len(tradingPairs)
