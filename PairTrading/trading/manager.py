@@ -103,7 +103,7 @@ class TradingManager(Base, metaclass=Singleton):
         logger.info(f"available cash: ${round(availableCash, 2)*2}")
         
         tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)          
-        print(tradeNums, notionalAmount) 
+        logger.info(f"enterable pair num: {tradeNums}, enterable quantity: ${round(notionalAmount, 2)}") 
         if tradeNums < 1:
             logger.info("No more trades can be placed currently")
             return 
@@ -123,8 +123,7 @@ class TradingManager(Base, metaclass=Singleton):
                 logger.info(f"short {pair[0]} long {pair[1]} pair position opened")
                 self.tradingRecord = tradingRecord
                 executedTrades += 1
-            except Exception as ex:
-                print(ex)
+            except Exception:
                 continue
         
             
