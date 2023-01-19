@@ -66,8 +66,7 @@ class TradingManager(Base, metaclass=Singleton):
     def _getOptimalTradingNum(self, tradingPairs, availableCash:float, currOpenedPositions:dict[str, Position]) -> (int, float):
         if availableCash <= 0:
             return (0, 0)
-        res:int = 0
-        
+               
         openedEquities:list = []
         tradingNum:int = 0
         avgEntryAmount:float = 0
@@ -76,21 +75,24 @@ class TradingManager(Base, metaclass=Singleton):
             for stock, position in currOpenedPositions.items():
                 openedEquities.append(abs(float(position.avg_entry_price) * float(position.qty)))
             openedEquities:np.array = np.array(openedEquities)
-            avgEntryAmount = openedEquities.max()
-            res = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs))
+            avgEntryAmount = np.average(openedEquities.max)
+            tradingNum = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs))
+            if not tradingNum and avgEntryAmount * 1.5 < availableCash:
+                avgEntryAmount *= 1.5 
+                tradingNum = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs))
+                
         else:
             tradingNum:int = len(tradingPairs)
             avgEntryAmount = availableCash / tradingNum
             while tradingNum > self._getViableTradesNum(avgEntryAmount, tradingPairs):
                 tradingNum -= 1
                 avgEntryAmount = availableCash / tradingNum
-            res = tradingNum
         
-        if res > len(tradingPairs):
-            res = len(tradingPairs)
-            avgEntryAmount = availableCash / res 
+        if tradingNum > len(tradingPairs):
+            tradingNum = len(tradingPairs)
+            avgEntryAmount = availableCash / tradingNum 
 
-        return (res, avgEntryAmount)
+        return (tradingNum, avgEntryAmount)
                   
     
     def openPositions(self) -> None:
