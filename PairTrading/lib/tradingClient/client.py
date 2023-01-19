@@ -82,7 +82,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
     def openPositions(self, stockPair:tuple, shortQty:float) -> tuple[Order, Order]:
         
         if shortQty < 1:
-            raise ValueError("insufficient shares number forecasted")
+            raise ValueError(f"{stockPair[0]} - {stockPair[1]}: insufficient shares number forecasted")
         
         # short the first stock
         for i in range(3):

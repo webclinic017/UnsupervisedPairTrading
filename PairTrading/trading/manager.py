@@ -56,7 +56,9 @@ class TradingManager(Base, metaclass=Singleton):
         res:int = 0
         
         for pair, _ in self.pairInfoRetriever.trainedPairs.items():
-            if self._getShortableQty(pair[0], entryAmount):
+            shortQty:float = self._getShortableQty(pair[0], entryAmount)
+            if shortQty:
+                logger.info(f"{pair[0]} - {pair[1]} enterable: {shortQty} shares can be shorted")
                 res += 1 
                 
         return res 
@@ -83,8 +85,7 @@ class TradingManager(Base, metaclass=Singleton):
         if res > len(tradingPairs):
             res = len(tradingPairs)
             avgEntryAmount = availableCash / res 
-        elif res > len(tmp):
-            avgEntryAmount = availableCash / res
+
         return (res, avgEntryAmount)
                   
     
