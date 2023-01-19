@@ -52,10 +52,10 @@ class TradingManager(Base, metaclass=Singleton):
         offset:float = (rawQty % 100) if (rawQty % 100) >= 50 else 0
         return ((rawQty // 100) * 100) + offset
     
-    def _getViableTradesNum(self, entryAmount:float) -> int:
+    def _getViableTradesNum(self, entryAmount:float, tradingPairs:dict[tuple, list]) -> int:
         res:int = 0
         
-        for pair, _ in self.pairInfoRetriever.trainedPairs.items():
+        for pair, _ in tradingPairs:
             shortQty:float = self._getShortableQty(pair[0], entryAmount)
             if shortQty:
                 logger.info(f"{pair[0]} - {pair[1]} enterable: {shortQty} shares can be shorted")
@@ -67,17 +67,21 @@ class TradingManager(Base, metaclass=Singleton):
         if availableCash <= 0:
             return (0, 0)
         res:int = 0
+        
+        openedEquities:list = []
+        tradingNum:int = 0
+        avgEntryAmount:float = 0
+        
         if currOpenedPositions:           
-            tmp:list = []
             for stock, position in currOpenedPositions.items():
-                tmp.append(abs(float(position.avg_entry_price) * float(position.qty)))
-            tmp:np.array = np.array(tmp)
-            avgEntryAmount = np.average(tmp)
-            res = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount))
+                openedEquities.append(abs(float(position.avg_entry_price) * float(position.qty)))
+            openedEquities:np.array = np.array(openedEquities)
+            avgEntryAmount = openedEquities.max()
+            res = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs))
         else:
             tradingNum:int = len(tradingPairs)
             avgEntryAmount = availableCash / tradingNum
-            while tradingNum > self._getViableTradesNum(avgEntryAmount):
+            while tradingNum > self._getViableTradesNum(avgEntryAmount, tradingPairs):
                 tradingNum -= 1
                 avgEntryAmount = availableCash / tradingNum
             res = tradingNum
