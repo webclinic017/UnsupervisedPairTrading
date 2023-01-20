@@ -58,9 +58,9 @@ class TradingManager(Base, metaclass=Singleton):
         for pair, _ in tradingPairs:
             shortQty:float = self._getShortableQty(pair[0], entryAmount)
             if shortQty:
-                logger.info(f"{pair[0]} - {pair[1]} enterable: {shortQty} shares can be shorted")
+                logger.info(f"{pair} enterable: {shortQty} shares can be shorted")
                 res += 1 
-                
+        print(res)
         return res 
     
     def _getOptimalTradingNum(self, tradingPairs, availableCash:float, currOpenedPositions:dict[str, Position]) -> (int, float):
