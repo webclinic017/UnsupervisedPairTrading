@@ -55,7 +55,7 @@ class TradingManager(Base, metaclass=Singleton):
     def _getViableTradesNum(self, entryAmount:float, tradingPairs:dict[tuple, list]) -> int:
         res:int = 0
         
-        for pair, _ in tradingPairs:
+        for pair, _ in tradingPairs.items():
             shortQty:float = self._getShortableQty(pair[0], entryAmount)
             if shortQty:
                 logger.info(f"{pair} enterable: {shortQty} shares can be shorted")
