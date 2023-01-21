@@ -36,7 +36,7 @@ if __name__ == "__main__":
     pairsDict:dict = getPairsFromTrainingJson()
     
     todayTrained:bool = (date.today() - datetime.strptime(pairsDict["time"], "%Y-%m-%d").date()).days == 0
-    if (date.today().day==2 and not todayTrained) or config.REFRESH_DATA:
+    if (date.today().day==2 and not todayTrained) or (config.REFRESH_DATA and not todayTrained):
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
         logger.info(f"new training needs to be conducted -- {reason}")
         getTrainAssign(alpacaAuth, eodAuth, config.OVERWRITE_FUNDAMENTALS) 
