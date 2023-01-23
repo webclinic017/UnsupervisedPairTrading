@@ -40,6 +40,9 @@ if __name__ == "__main__":
         reason:str = "overdue for training" if (date.today().day==2 and not todayTrained) else "manual decision for new training"
         logger.info(f"new training needs to be conducted -- {reason}")
         getTrainAssign(alpacaAuth, eodAuth, config.OVERWRITE_FUNDAMENTALS) 
+        # write that the training has been done
+        pairsDict["time"] = datetime.today().strftime("%Y-%m-%d")
+        writeToJson(pairsDict, "saveddata/pairs/pairs.json")
         
     #initialize pair-creator
     logger.info("initializing pair creator")
