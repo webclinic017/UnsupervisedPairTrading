@@ -114,7 +114,6 @@ class TradingManager(Base, metaclass=Singleton):
         logger.info(f"available cash: ${round(availableCash, 2)*2}")
         
         tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)          
-        logger.info(f"enterable pair num: {tradeNums}, enterable quantity: ${round(notionalAmount, 2)}") 
         if tradeNums < 1:
             logger.info("No more trades can be placed currently")
             return 
