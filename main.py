@@ -84,5 +84,8 @@ if __name__ == "__main__":
             newPairs:dict = pairCreator.getFinalPairs(trainDate)
             writeToJson(newPairs, "saveddata/pairs/pairs.json")
             logger.info("new pairs created")
+        print()
+        print("========================================================================")
+        print()
         time.sleep(60*5) # sleep for 5 minutes
         
