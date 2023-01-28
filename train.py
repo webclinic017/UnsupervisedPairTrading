@@ -1,6 +1,7 @@
 from PairTrading import FeatureGenerator
 from lib.tradingClient import AlpacaTradingClient
-from lib.dataEngine import AlpacaDataClient, EodDataClient
+from lib.dataEngine.alpacadata import AlpacaDataClient
+from lib.dataEngine.eoddata import EodDataClient
 from authentication.authLoader import getAuth
 from authentication.base import BaseAuth
 

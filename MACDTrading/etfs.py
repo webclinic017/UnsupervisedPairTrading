@@ -63,23 +63,26 @@ class ETFs(Base, metaclass=Singleton):
         
     
     def getCandidates(self) -> dict:
-        res = {}
+        res = {"leveraged": {},
+               "unleveraged": {}}
+        
+        tradableStocksSymbols = [asset.symbol for asset in self.tradingClient.allTradableStocks]
         
         res["leveraged"][ETF_TYPES.OPTIONS] = [asset for asset in set(ETFs.leveraged[ETF_TYPES.OPTIONS]) if \
-                                                asset in self.tradingClient.allTradableStocks and \
-                                                self.dataClient.getLatestMarketCap(asset) > 10_000_000
+                                                asset in tradableStocksSymbols and \
+                                                self.dataClient.getMarketCap(asset) > 10_000_000
                                             ]
         res["leveraged"][ETF_TYPES.NON_OPTIONS] = [asset for asset in set(ETFs.leveraged[ETF_TYPES.NON_OPTIONS]) if \
-                                                asset in self.tradingClient.allTradableStocks and \
-                                                self.dataClient.getLatestMarketCap(asset) > 10_000_000
+                                                asset in tradableStocksSymbols and \
+                                                self.dataClient.getMarketCap(asset) > 10_000_000
                                             ]
         res["unleveraged"][ETF_TYPES.OPTIONS] = [asset for asset in set(ETFs.unleveraged[ETF_TYPES.OPTIONS]) if \
-                                                asset in self.tradingClient.allTradableStocks and \
-                                                self.dataClient.getLatestMarketCap(asset) > 10_000_000
+                                                asset in tradableStocksSymbols and \
+                                                self.dataClient.getMarketCap(asset) > 10_000_000
                                             ]
         res["unleveraged"][ETF_TYPES.NON_OPTIONS] = [asset for asset in set(ETFs.unleveraged[ETF_TYPES.NON_OPTIONS]) if \
-                                                asset in self.tradingClient.allTradableStocks and \
-                                                self.dataClient.getLatestMarketCap(asset) > 10_000_000
+                                                asset in tradableStocksSymbols and \
+                                                self.dataClient.getMarketCap(asset) > 10_000_000
                                             ]
         
         return res 

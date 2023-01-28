@@ -9,6 +9,7 @@ from config.configloader import configLoader
 from alpaca.trading.models import Order
 
 from train import getTrainAssign
+from config.model import CONFIG_TYPE
 import logging
 from pandas import DataFrame, read_csv
 from datetime import datetime, date
@@ -18,7 +19,7 @@ import sys
 ENTRY_PERCENT = 0.4
 REFRESH_DATA = False
 
-config = configLoader()
+config = configLoader(CONFIG_TYPE.PAIR_TRADING)
 print(config)
 
 if __name__ == "__main__":   
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     cleanClosedTrades()
     
     # initialize authentication objects 
-    alpacaAuth:AlpacaAuth = getAuth("alpaca", config.IS_PAPER)
+    alpacaAuth:AlpacaAuth = getAuth("alpaca_main", config.IS_PAPER)
     eodAuth:EodAuth = getAuth("eod")
     # get recently trained final pairs data 
     pairsDict:dict = getPairsFromTrainingJson()

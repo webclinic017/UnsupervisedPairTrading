@@ -3,10 +3,9 @@ from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest, Stoc
 from alpaca.data.models import Quote, Bar
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
-from authentication.auth import AlpacaAuth
-from authentication.base import BaseAuth
 from lib.dataEngine.common import BarCollection
-from PairTrading.util.patterns import Singleton, Base
+from lib.patterns.singleton import Singleton
+from lib.patterns.base import Base
 
 import pandas as pd 
 from datetime import datetime
@@ -15,21 +14,21 @@ from dateutil.relativedelta import relativedelta
 
 class AlpacaDataClient(Base, metaclass=Singleton):
     
-    def __init__(self, auth:AlpacaAuth):
+    def __init__(self, auth):
         self.dataClient:StockHistoricalDataClient = StockHistoricalDataClient(
             api_key=auth.api_key,
             secret_key=auth.secret_key
         )   
     
     @classmethod
-    def create(cls, auth:AlpacaAuth):
+    def create(cls, auth):
         if cls._isAuthValid(auth):
             return cls(auth=auth)
         else:
             raise AttributeError("the auth object is invalid")
     
     @staticmethod
-    def _isAuthValid(auth:AlpacaAuth) -> bool:
+    def _isAuthValid(auth) -> bool:
         if auth.api_key and auth.secret_key:
             return True 
         return False 
@@ -91,15 +90,10 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         )[symbol].close
         
-    def getLatestMarketCap(self, symbol:str) -> float:
-        bar:Bar = self.dataClient.get_stock_latest_bar(
-            StockLatestBarRequest(
-                symbol_or_symbols=symbol,
-                feed=DataFeed.SIP
-            )
-        )[symbol]
+    def getMarketCap(self, symbol:str) -> float:
+        df:pd.DataFrame = self.getMonthly(symbol)
         
-        return bar.vwap * bar.volume
+        return (df["vwap"] * df["volume"]).mean()
         
     def getLongDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(

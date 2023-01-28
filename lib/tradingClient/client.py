@@ -1,10 +1,10 @@
-from authentication import AlpacaAuth
+from authentication.auth import AlpacaAuth
 from authentication.enums import ConfigType
 from PairTrading.util.read import getRecentlyClosed
-from PairTrading.util.patterns import Singleton, Base 
+from lib.patterns import Singleton, Base 
 
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce, QueryOrderStatus
+from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus, OrderSide, TimeInForce
 from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest, GetOrdersRequest
 from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
 
@@ -28,13 +28,13 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
     
     @classmethod
     def create(cls, alpacaAuth:AlpacaAuth):
-        if alpacaAuth.configType != ConfigType.ALPACA:
+        if alpacaAuth.configType not in (ConfigType.ALPACA_MAIN, ConfigType.ALPACA_SIDE):
             raise AttributeError("the auth object is not for Alpaca client")
         return cls(auth=alpacaAuth)
     
     @property
-    def allTradableStocks(self) -> set[str]:
-        return {asset.symbol for asset in self._allStocks if asset.tradable and fractionable}
+    def allTradableStocks(self) -> list[str]:
+        return [asset for asset in self._allStocks if asset.tradable and asset.fractionable]
     
     @property
     def clock(self) -> Clock:
@@ -53,7 +53,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
     def getViableStocks(self) -> list[str]:
              
         recentlyClosed:dict[str, date] = getRecentlyClosed() if getRecentlyClosed() else {}
-        validAssets:list[str] = [asset.symbol for asset in self.allStocks if (asset.fractionable==True and \
+        validAssets:list[str] = [asset.symbol for asset in self.allTradableStocks if (asset.fractionable==True and \
                                             asset.shortable==True and \
                                             asset.easy_to_borrow==True and \
                                             asset.exchange in (AssetExchange.NYSE, AssetExchange.AMEX, AssetExchange.NASDAQ) and \
@@ -76,7 +76,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         self.client.get
         return self.client.get_orders(
             GetOrdersRequest(
-                status=QueryOrderStatus.CLOSED,
+                status="closed",
                 symbols=list(pairSymbols)
             )
         )

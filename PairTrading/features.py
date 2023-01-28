@@ -1,10 +1,11 @@
-from lib.dataEngine import AlpacaDataClient, EodDataClient
+from lib.dataEngine.alpacadata import AlpacaDataClient
+from lib.dataEngine.eoddata import EodDataClient
 from PairTrading.data.fundamentals import FundamentalsData
 from PairTrading.data.technicals import TechnicalData
-from authentication import AlpacaAuth, EodAuth
+from authentication.auth import AlpacaAuth, EodAuth
 from PairTrading.util.write import writeToJson
 from PairTrading.util.read import readFromJson
-from PairTrading.util.patterns import Singleton
+from lib.patterns import Singleton
 from authentication.enums import ConfigType
 
 from pandas import DataFrame, Series, concat
@@ -33,7 +34,7 @@ class FeatureGenerator(metaclass=Singleton):
         
     @classmethod
     def create(cls, alpacaAuth:AlpacaAuth, eodAuth:EodAuth, stockList:list):
-        if (alpacaAuth.configType==ConfigType.ALPACA and eodAuth.configType==ConfigType.EOD):
+        if (alpacaAuth.configType in (ConfigType.ALPACA_MAIN, ConfigType.ALPACA_SIDE) and eodAuth.configType==ConfigType.EOD):
             return cls(
                 alpacaAuth=alpacaAuth,
                 eodAuth=eodAuth,

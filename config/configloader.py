@@ -17,10 +17,12 @@ def configLoader(configType:CONFIG_TYPE) -> Config:
         )
         
     elif configType == CONFIG_TYPE.MACD_TRADING:
-        with open(f"config/pairtrading_config.yaml", "r") as inFile:
+        with open(f"config/macd_config.yaml", "r") as inFile:
             configDict:dict = yaml.load(inFile, Loader=yaml.Loader)
             
         return Config(
             ENTRYPERCENT=configDict["entry_percent"],
-            IS_PAPER=configDict["is_paper"]
+            IS_PAPER=configDict["is_paper"],
+            REFRESH_DATA=False,
+            OVERWRITE_FUNDAMENTALS=False       
         )

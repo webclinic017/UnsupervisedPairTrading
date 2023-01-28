@@ -12,7 +12,6 @@ class Config:
     REFRESH_DATA: bool 
     OVERWRITE_FUNDAMENTALS: bool 
     IS_PAPER: bool 
-    RUN_MAIN_ACCOUNT: bool
     
     def __repr__(self):
         return str(asdict(self))

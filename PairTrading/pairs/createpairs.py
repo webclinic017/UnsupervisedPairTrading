@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from lib.dataEngine import AlpacaDataClient
-from PairTrading.util.patterns import Singleton, Base
+from lib.patterns import Singleton, Base
 from PairTrading.pairs.cointegration import CointTest
 
 from tqdm import tqdm

@@ -2,9 +2,9 @@ from lib.tradingClient import AlpacaTradingClient
 from lib.dataEngine import AlpacaDataClient
 from PairTrading.util.read import readFromJson, getRecentlyClosed, getTradingRecord, getPairsFromTrainingJson
 from PairTrading.util.write import writeToJson, dumpRecentlyClosed, dumpTradingRecord
-from PairTrading.util.patterns import Singleton, Base
+from lib.patterns import Singleton, Base
 from PairTrading.trading.helper import PairInfoRetriever
-from authentication import AlpacaAuth
+from authentication.auth import AlpacaAuth
 
 from alpaca.trading.models import TradeAccount, Position, Order
 from alpaca.data.models import Quote
