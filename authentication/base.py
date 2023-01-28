@@ -1,5 +1,5 @@
 from authentication.enums import ConfigType
-from PairTrading.util.patterns import Base
+from lib.patterns import Base
 
 
 class BaseAuth(Base):

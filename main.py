@@ -21,8 +21,7 @@ REFRESH_DATA = False
 config = configLoader()
 print(config)
 
-if __name__ == "__main__":
-    # logging.basicConfig(filename="saveddata/log/trading.log", filemode="w", format="%(asctime)s - %(message)s", level=logging.INFO)   
+if __name__ == "__main__":   
     logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
     logger = logging.getLogger(__name__)
         
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     writeToJson(newPairs, "saveddata/pairs/pairs.json")
     
     # initialize trading manager
-    manager = TradingManager.create(alpacaAuth, ENTRY_PERCENT)
+    manager = TradingManager.create(alpacaAuth, config.ENTRYPERCENT)
     
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
     while not manager.tradingClient.clock.is_open:

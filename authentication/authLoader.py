@@ -1,6 +1,6 @@
 import yaml 
 from authentication.base import BaseAuth
-from authentication.auth import *
+from authentication.auth import AlpacaAuth
 from authentication.enums import ConfigType
 
 def getAuth(fileName:str, isPaper:bool=True) -> BaseAuth:
