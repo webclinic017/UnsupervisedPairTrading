@@ -1,10 +1,10 @@
-from PairTrading.lib.tradingClient import AlpacaTradingClient
-from PairTrading.lib.dataEngine import AlpacaDataClient
+from lib.tradingClient import AlpacaTradingClient
+from lib.dataEngine import AlpacaDataClient
 from PairTrading.util.read import readFromJson, getRecentlyClosed, getTradingRecord, getPairsFromTrainingJson
 from PairTrading.util.write import writeToJson, dumpRecentlyClosed, dumpTradingRecord
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.trading.helper import PairInfoRetriever
-from PairTrading.authentication import AlpacaAuth
+from authentication import AlpacaAuth
 
 from alpaca.trading.models import TradeAccount, Position, Order
 from alpaca.data.models import Quote
@@ -125,7 +125,7 @@ class TradingManager(Base, metaclass=Singleton):
             if executedTrades >= tradeNums:
                 break
             try:
-                shortOrder, longOrder = self.tradingClient.openPositions(
+                shortOrder, longOrder = self.tradingClient.openArbitragePositions(
                     stockPair=(pair[0], pair[1]), 
                     shortQty=self._getShortableQty(pair[0], notionalAmount)
                 )           
@@ -177,7 +177,7 @@ class TradingManager(Base, metaclass=Singleton):
         recentlyClosed:dict[str, date] = self.pairInfoRetriever.recentlyClosedPositions
         
         for pair in closeablePairs:
-            order1, order2 = self.tradingClient.closePositions(pair)
+            order1, order2 = self.tradingClient.closeArbitragePositions(pair)
             del tradingRecord[pair]
             recentlyClosed[order1.symbol] = order1.submitted_at.date()
             recentlyClosed[order2.symbol] = order2.submitted_at.date()       

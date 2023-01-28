@@ -1,7 +1,7 @@
 import yaml 
-from PairTrading.authentication.base import BaseAuth
-from PairTrading.authentication.auth import *
-from PairTrading.authentication.enums import ConfigType
+from authentication.base import BaseAuth
+from authentication.auth import *
+from authentication.enums import ConfigType
 
 def getAuth(fileName:str, isPaper:bool=True) -> BaseAuth:
     with open(f"credentials/{fileName}.yaml", "r") as inFile:

@@ -1,5 +1,5 @@
-from PairTrading.authentication.base import BaseAuth
-from PairTrading.authentication.enums import ConfigType
+from authentication.base import BaseAuth
+from authentication.enums import ConfigType
 
 class AlpacaAuth(BaseAuth):
     def __init__(self, api_key, secret_key:str, isPaper:bool=True):

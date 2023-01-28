@@ -1,8 +1,8 @@
 from PairTrading import FeatureGenerator
-from PairTrading.lib.tradingClient import AlpacaTradingClient
-from PairTrading.lib.dataEngine import AlpacaDataClient, EodDataClient
-from PairTrading.authentication.authLoader import getAuth
-from PairTrading.authentication.base import BaseAuth
+from lib.tradingClient import AlpacaTradingClient
+from lib.dataEngine import AlpacaDataClient, EodDataClient
+from authentication.authLoader import getAuth
+from authentication.base import BaseAuth
 
 from PairTrading.training import Clustering
 from PairTrading.pairs.createpairs import PairCreator

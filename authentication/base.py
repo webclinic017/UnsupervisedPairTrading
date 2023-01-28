@@ -1,4 +1,4 @@
-from PairTrading.authentication.enums import ConfigType
+from authentication.enums import ConfigType
 from PairTrading.util.patterns import Base
 
 

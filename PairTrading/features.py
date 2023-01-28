@@ -1,11 +1,11 @@
-from PairTrading.lib.dataEngine import AlpacaDataClient, EodDataClient
+from lib.dataEngine import AlpacaDataClient, EodDataClient
 from PairTrading.data.fundamentals import FundamentalsData
 from PairTrading.data.technicals import TechnicalData
-from PairTrading.authentication import AlpacaAuth, EodAuth
+from authentication import AlpacaAuth, EodAuth
 from PairTrading.util.write import writeToJson
 from PairTrading.util.read import readFromJson
 from PairTrading.util.patterns import Singleton
-from PairTrading.authentication.enums import ConfigType
+from authentication.enums import ConfigType
 
 from pandas import DataFrame, Series, concat
 import json 

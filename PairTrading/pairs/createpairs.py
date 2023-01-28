@@ -3,8 +3,7 @@ from numpy import array, dot
 from sklearn.preprocessing import StandardScaler
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
-
-from PairTrading.lib.dataEngine import AlpacaDataClient
+from lib.dataEngine import AlpacaDataClient
 from PairTrading.util.patterns import Singleton, Base
 from PairTrading.pairs.cointegration import CointTest
 

@@ -1,5 +1,5 @@
 from PairTrading.data.fundamentals.firmCharacteristics import FirmCharGetter
-from PairTrading.lib.dataEngine.common import BarCollection
+from lib.dataEngine.common import BarCollection
 from pandas import Series
 
 class FundamentalsData:

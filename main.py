@@ -1,8 +1,8 @@
 from PairTrading.util import cleanClosedTrades, getPairsFromTrainingJson, writeToJson
 from PairTrading.trading import TradingManager
-from PairTrading.lib.dataEngine import AlpacaDataClient
-from PairTrading.authentication.auth import AlpacaAuth, EodAuth
-from PairTrading.authentication.authLoader import getAuth
+from lib.dataEngine import AlpacaDataClient
+from authentication.auth import AlpacaAuth, EodAuth
+from authentication.authLoader import getAuth
 from PairTrading.pairs.createpairs import PairCreator
 from config.configloader import configLoader
 

@@ -1,5 +1,5 @@
-from PairTrading.authentication import AlpacaAuth
-from PairTrading.authentication.enums import ConfigType
+from authentication import AlpacaAuth
+from authentication.enums import ConfigType
 from PairTrading.util.read import getRecentlyClosed
 from PairTrading.util.patterns import Singleton, Base 
 
@@ -19,12 +19,22 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
             secret_key=auth.secret_key,
             paper=auth.isPaper
         ) 
+        self._allStocks:list[Asset] = self.client.get_all_assets(
+            GetAssetsRequest(
+                status=AssetStatus.ACTIVE,
+                asset_class=AssetClass.US_EQUITY
+            )
+        )
     
     @classmethod
     def create(cls, alpacaAuth:AlpacaAuth):
         if alpacaAuth.configType != ConfigType.ALPACA:
             raise AttributeError("the auth object is not for Alpaca client")
         return cls(auth=alpacaAuth)
+    
+    @property
+    def allTradableStocks(self) -> set[str]:
+        return {asset.symbol for asset in self._allStocks if asset.tradable and fractionable}
     
     @property
     def clock(self) -> Clock:
@@ -41,15 +51,9 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
     
     
     def getViableStocks(self) -> list[str]:
-        
-        allAssets:list[Asset] = self.client.get_all_assets(
-            GetAssetsRequest(
-                status=AssetStatus.ACTIVE,
-                asset_class=AssetClass.US_EQUITY
-            )
-        )      
+             
         recentlyClosed:dict[str, date] = getRecentlyClosed() if getRecentlyClosed() else {}
-        validAssets:list[str] = [asset.symbol for asset in allAssets if (asset.fractionable==True and \
+        validAssets:list[str] = [asset.symbol for asset in self.allStocks if (asset.fractionable==True and \
                                             asset.shortable==True and \
                                             asset.easy_to_borrow==True and \
                                             asset.exchange in (AssetExchange.NYSE, AssetExchange.AMEX, AssetExchange.NASDAQ) and \
@@ -77,9 +81,41 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
             )
         )
         
+        
+    def openMACDPosition(self, symbol:str, entryAmount:float) -> Order:
+        
+        if entryAmount < 0:
+            raise ValueError(f"entry amount: ${round(entryAmount, 2)}  entry amount must be positive")
+        
+        for _ in range(3):
+            try:
+                order:Order = self.client.submit_order(
+                    order_data=MarketOrderRequest(
+                        symbol=symbol,
+                        qty=entryAmount,
+                        side=OrderSide.BUY,
+                        time_in_force=TimeInForce.DAY
+                    )
+                )
+            except:
+                time.sleep(1)
+            finally:
+                return order
+            
+            
+    def closeMACDPosition(self, symbol:str) -> Order:
+        
+        for _ in range(3):
+            try:
+                order:Order = self.client.close_position(symbol)
+            except:
+                time.sleep(1)
+            finally:
+                return order
+                
+   
     
-    
-    def openPositions(self, stockPair:tuple, shortQty:float) -> tuple[Order, Order]:
+    def openArbitragePositions(self, stockPair:tuple, shortQty:float) -> tuple[Order, Order]:
         
         if shortQty < 1:
             raise ValueError(f"{stockPair[0]} - {stockPair[1]}: insufficient shares number forecasted")
@@ -119,7 +155,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         filledLongOrder:Order = self.client.get_order_by_id(longOrder.id)
         return (filledShortOrder, filledLongOrder)
     
-    def closePositions(self, stockPair:tuple) -> tuple[Order, Order]:
+    def closeArbitragePositions(self, stockPair:tuple) -> tuple[Order, Order]:
         
         # closed short position
         closedShortOrder:Order = self.client.close_position(stockPair[0])

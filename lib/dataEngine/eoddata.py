@@ -1,6 +1,6 @@
 from eod import EodHistoricalData
-from PairTrading.authentication.base import BaseAuth
-from PairTrading.authentication.enums import ConfigType
+from authentication.base import BaseAuth
+from authentication.enums import ConfigType
 from PairTrading.util.patterns import Singleton, Base 
 
 class EodDataClient(Base, metaclass=Singleton):

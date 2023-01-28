@@ -1,11 +1,11 @@
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest, StockLatestQuoteRequest, StockQuotesRequest, StockLatestBarRequest
-from alpaca.data.models import Quote
+from alpaca.data.models import Quote, Bar
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
-from PairTrading.authentication.auth import AlpacaAuth
-from PairTrading.authentication.base import BaseAuth
-from PairTrading.lib.dataEngine.common import BarCollection
+from authentication.auth import AlpacaAuth
+from authentication.base import BaseAuth
+from lib.dataEngine.common import BarCollection
 from PairTrading.util.patterns import Singleton, Base
 
 import pandas as pd 
@@ -90,6 +90,16 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 feed=DataFeed.SIP
             )
         )[symbol].close
+        
+    def getLatestMarketCap(self, symbol:str) -> float:
+        bar:Bar = self.dataClient.get_stock_latest_bar(
+            StockLatestBarRequest(
+                symbol_or_symbols=symbol,
+                feed=DataFeed.SIP
+            )
+        )[symbol]
+        
+        return bar.vwap * bar.volume
         
     def getLongDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
