@@ -91,7 +91,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
         )[symbol].close
         
     def getMarketCap(self, symbol:str) -> float:
-        df:pd.DataFrame = self.getMonthly(symbol)
+        df:pd.DataFrame = self.getDaily(symbol)
         
         return (df["vwap"] * df["volume"]).mean()
         
