@@ -4,6 +4,9 @@ from lib.dataEngine import AlpacaDataClient
 from lib.tradingClient import AlpacaTradingClient
 from lib.patterns import Base, Singleton
 from alpaca.trading.models import Position
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MACDManager(Base, metaclass=Singleton):
@@ -39,8 +42,8 @@ class MACDManager(Base, metaclass=Singleton):
         candidates:list = [stock for stock in candidates if stock not in openedPositions.keys() and \
                             self.signalcatcher.canOpen(stock)]
         
-        if len(candidates) > 8 - len(openedPositions):
-            candidates = candidates[:8]
+        if len(candidates) > 5 - len(openedPositions):
+            candidates = candidates[:5]
             
         return candidates
     
@@ -51,9 +54,12 @@ class MACDManager(Base, metaclass=Singleton):
         
         stockCandidates:list = self._getEnterableStocks(openedPositions)        
         availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent - openedPositionSums
+        logger.info(f"available cash: ${round(availableCash, 2)}")
         
         for symbol in stockCandidates:
-            self.tradingClient.openMACDPosition(symbol, availableCash/len(stockCandidates))
+            order = self.tradingClient.openMACDPosition(symbol, availableCash/len(stockCandidates))
+            logger.info(f"{symbol} bought    ----   entered amount: ${round(order.notional, 2)}")
+            
             
     
     def _getCloseableStocks(self, openedPositions:dict[str, Position]) -> list:       
@@ -66,3 +72,4 @@ class MACDManager(Base, metaclass=Singleton):
         
         for symbol in closeableStocks:
             self.tradingClient.closeMACDPosition(symbol)
+            logger.info(f"{symbol} position closed")
