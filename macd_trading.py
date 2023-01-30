@@ -17,7 +17,7 @@ from tqdm import tqdm
 config:Config = configLoader(configType=CONFIG_TYPE.MACD_TRADING)
 print(config)
 
-alpacaAuth:AlpacaAuth = getAuth("alpaca_side")
+alpacaAuth:AlpacaAuth = getAuth("alpaca_side", config.IS_PAPER)
 dataClient:AlpacaDataClient = AlpacaDataClient.create(alpacaAuth)
 tradingClient:AlpacaTradingClient = AlpacaTradingClient.create(alpacaAuth)
 
