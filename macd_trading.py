@@ -9,7 +9,7 @@ from alpaca.trading.models import Position
 from MACDTrading import MACDManager, ETFs
 import logging
 from datetime import datetime
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 import time
 import sys
 from tqdm import tqdm
