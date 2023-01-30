@@ -102,9 +102,8 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
                 )
             except:
                 time.sleep(1)
-            finally:
-                return order
-            
+        
+        return order            
             
     def closeMACDPosition(self, symbol:str) -> Order:
         
