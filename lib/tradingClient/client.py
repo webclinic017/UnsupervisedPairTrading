@@ -10,6 +10,9 @@ from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
 
 from datetime import date, datetime, timezone
 import time
+import logging 
+
+logger = logging.getLogger(__name__)
 
 class AlpacaTradingClient(Base, metaclass=Singleton):
     
@@ -94,14 +97,14 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
                 order:Order = self.client.submit_order(
                     order_data=MarketOrderRequest(
                         symbol=symbol,
-                        qty=entryAmount,
+                        notional=entryAmount,
                         side=OrderSide.BUY,
                         time_in_force=TimeInForce.DAY
-                    )
-                    
+                    )                  
                 )
                 return order
-            except:
+            except Exception as ex:
+                logger.error(ex)
                 time.sleep(1)
               
             
@@ -110,10 +113,11 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         for _ in range(3):
             try:
                 order:Order = self.client.close_position(symbol)
-            except:
-                time.sleep(1)
-            finally:
                 return order
+            except Exception as ex:
+                logger.error(ex)
+                time.sleep(1)
+
                 
    
     
