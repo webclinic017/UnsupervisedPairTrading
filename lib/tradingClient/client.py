@@ -47,7 +47,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         if clock.is_open:
             return 0
         
-        return int((clock.next_open.replace(tzinfo=None) - datetime.now().replace(tzinfo=None)).total_seconds())
+        return int((clock.next_open.replace(tzinfo=None) - clock.timestamp.replace(tzinfo=None)).total_seconds())
 
     
     
@@ -84,6 +84,8 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         
         
     def openMACDPosition(self, symbol:str, entryAmount:float) -> Order:
+        
+        order = None
         
         if entryAmount < 0:
             raise ValueError(f"entry amount: ${round(entryAmount, 2)}  entry amount must be positive")
