@@ -85,7 +85,6 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         
     def openMACDPosition(self, symbol:str, entryAmount:float) -> Order:
         
-        order = None
         
         if entryAmount < 0:
             raise ValueError(f"entry amount: ${round(entryAmount, 2)}  entry amount must be positive")
@@ -99,11 +98,12 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
                         side=OrderSide.BUY,
                         time_in_force=TimeInForce.DAY
                     )
+                    
                 )
+                return order
             except:
                 time.sleep(1)
-        
-        return order            
+              
             
     def closeMACDPosition(self, symbol:str) -> Order:
         
