@@ -26,12 +26,17 @@ manager:MACDManager = MACDManager.create(
     tradingClient=tradingClient, 
     entryPercent=config.ENTRYPERCENT)
 
+
+
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
     openedPositions:dict[str, Position] = tradingClient.openedPositions
+    start = time.perf_counter()
+    print(manager._getEnterableEquities(openedPositions))
+    print(f"time taken: {round(time.perf_counter() - start, 2)} seconds")
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
     while not manager.tradingClient.clock.is_open:
         if 0 < timeTillMarketOpens <= 3600 * 8:
@@ -46,8 +51,8 @@ if __name__ == "__main__":
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
         
-    # wait till 5 minutes before the market closes
-    secondsLeft:int = int((manager.tradingClient.clock.next_close.replace(tzinfo=None) - relativedelta(minutes=5) -
+    # wait till 10 minutes before the market closes
+    secondsLeft:int = int((manager.tradingClient.clock.next_close.replace(tzinfo=None) - relativedelta(minutes=10) -
                        manager.tradingClient.clock.timestamp.replace(tzinfo=None)).total_seconds())
     logger.info(f"{round(secondsLeft/3600, 2)} hours left before the bot can start operating")   
     for _ in tqdm(range(secondsLeft), desc="waiting till the bot can act ..."):

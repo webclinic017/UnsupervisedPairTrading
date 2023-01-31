@@ -6,6 +6,7 @@ from alpaca.trading.models import Asset
 from alpaca.trading.requests import GetAssetsRequest
 
 from enum import Enum
+from tqdm import tqdm
 
 class ETF_TYPES(Enum):
     OPTIONS = "options"
@@ -61,8 +62,20 @@ class ETFs(Base, metaclass=Singleton):
             dataClient=dataClient
         )
         
+    def getAllCandidates(self) -> list[str]:
+        tradableStocksSymbols = [asset.symbol for asset in self.tradingClient.allTradableStocks]
+        res = []
+        for symbol in tqdm(tradableStocksSymbols, desc="filter for viable stocks"):
+            try:
+                if self.dataClient.getMarketCap(symbol) > 10_000_000:
+                    res.append(symbol)
+            except:
+                continue
+                
+        return res 
+        
     
-    def getCandidates(self) -> dict:
+    def getETFCandidates(self) -> dict:
         res = {"leveraged": {},
                "unleveraged": {}}
         

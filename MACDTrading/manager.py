@@ -5,6 +5,7 @@ from lib.tradingClient import AlpacaTradingClient
 from lib.patterns import Base, Singleton
 from alpaca.trading.models import Position
 import logging
+from pandas import Series
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class MACDManager(Base, metaclass=Singleton):
             tradingClient=self.tradingClient, 
             dataClient=self.dataClient)
         
-        self.candidates:dict = self.etfs.getCandidates()
+        self.candidates:dict = self.etfs.getAllCandidates()
         
     @classmethod
     def create(cls, dataClient:AlpacaDataClient, tradingClient:AlpacaTradingClient, entryPercent:float):
@@ -31,7 +32,7 @@ class MACDManager(Base, metaclass=Singleton):
         )
         
     
-    def _getEnterableStocks(self, openedPositions:dict[str, Position]) -> list:
+    def _getEnterableETFs(self, openedPositions:dict[str, Position]) -> list:
         
         leveragedOptions:list = self.candidates["leveraged"][ETF_TYPES.OPTIONS]
         leveragedNonOptions:list = self.candidates["leveraged"][ETF_TYPES.NON_OPTIONS]
@@ -47,19 +48,26 @@ class MACDManager(Base, metaclass=Singleton):
             
         return candidates
     
+    def _getEnterableEquities(self, openedPositions:dict[str, Position]) -> list:
+        equities = list(Series({stock:self.signalcatcher.getATR(stock) for stock in self.candidates if stock not in openedPositions.keys() and 
+                    self.signalcatcher.canOpen(stock)}).sort_index(ascending=False).index)
+            
+        return equities
+    
     
     def openPositions(self) -> None:
         openedPositions:dict[str, Position] = self.tradingClient.openedPositions
         openedPositionSums:float = sum([abs(float(p.cost_basis)) for p in openedPositions.values()])
         
-        stockCandidates:list = self._getEnterableStocks(openedPositions)        
+        stockCandidates:list = self._getEnterableEquities(openedPositions)       
         availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent - openedPositionSums
         logger.info(f"available cash: ${round(availableCash, 2)}")
         logger.info(f"enterable stocks: {stockCandidates}")
         
-        for symbol in stockCandidates:
-            order = self.tradingClient.openMACDPosition(symbol, availableCash/len(stockCandidates))
-            logger.info(f"{symbol} bought    ----   entered amount: ${round(order.notional, 2)}")
+        if self.tradingClient.clock.is_open:
+            for i in range(5 - len(openedPositions)):
+                order = self.tradingClient.openMACDPosition(stockCandidates[i], availableCash/(5-len(openedPositions)))
+                logger.info(f"{stockCandidates[i]} bought    ----   entered amount: ${round(order.notional, 2)}")
             
             
     
@@ -72,6 +80,7 @@ class MACDManager(Base, metaclass=Singleton):
         closeableStocks:list = self._getCloseableStocks(openedPositions)
         logger.info(f"closeable stocks: {closeableStocks}")
         
-        for symbol in closeableStocks:
-            self.tradingClient.closeMACDPosition(symbol)
-            logger.info(f"{symbol} position closed")
+        if self.tradingClient.clock.is_open:
+            for symbol in closeableStocks:
+                self.tradingClient.closeMACDPosition(symbol)
+                logger.info(f"{symbol} position closed")
