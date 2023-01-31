@@ -34,9 +34,6 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     openedPositions:dict[str, Position] = tradingClient.openedPositions
-    start = time.perf_counter()
-    print(manager._getEnterableEquities(openedPositions))
-    print(f"time taken: {round(time.perf_counter() - start, 2)} seconds")
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
     while not manager.tradingClient.clock.is_open:
         if 0 < timeTillMarketOpens <= 3600 * 8:
