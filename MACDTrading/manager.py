@@ -68,7 +68,7 @@ class MACDManager(Base, metaclass=Singleton):
             entryNum:int = min(20 - len(openedPositions), len(stockCandidates))
             for i in range(entryNum):
                 order = self.tradingClient.openMACDPosition(stockCandidates[i], availableCash/entryNum)
-                logger.info(f"{stockCandidates[i]} bought    ----   entered amount: ${round(order.notional, 2)}")
+                logger.info(f"{stockCandidates[i]} bought    ----   entered amount: ${round(float(order.notional), 2)}")
             
             
     
