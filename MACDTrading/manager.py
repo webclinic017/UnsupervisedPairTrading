@@ -6,6 +6,7 @@ from lib.patterns import Base, Singleton
 from alpaca.trading.models import Position
 import logging
 from pandas import Series
+import time 
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +50,11 @@ class MACDManager(Base, metaclass=Singleton):
         return candidates
     
     def _getEnterableEquities(self, openedPositions:dict[str, Position]) -> list:
+        logger.info("start retrieving enterable equities ... ")
+        start = time.perf_counter()
         equities = list(Series({stock:self.signalcatcher.getATR(stock) for stock in self.candidates if stock not in openedPositions.keys() and 
                     self.signalcatcher.canOpen(stock)}).sort_index(ascending=False).index)
+        logger.info(f"retrieval complete. time taken: {round(time.perf_counter() - start, 2)} minutes")
             
         return equities
     
