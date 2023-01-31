@@ -66,7 +66,6 @@ class MACDManager(Base, metaclass=Singleton):
         stockCandidates:list = self._getEnterableEquities(openedPositions)       
         availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent - openedPositionSums
         logger.info(f"available cash: ${round(availableCash, 2)}")
-        logger.info(f"enterable stocks: {stockCandidates}")
         
         if self.tradingClient.clock.is_open:
             entryNum:int = min(20 - len(openedPositions), len(stockCandidates))
@@ -83,7 +82,6 @@ class MACDManager(Base, metaclass=Singleton):
     def closePositions(self) -> None:
         openedPositions:dict[str, Position] = self.tradingClient.openedPositions
         closeableStocks:list = self._getCloseableStocks(openedPositions)
-        logger.info(f"closeable stocks: {closeableStocks}")
         
         if self.tradingClient.clock.is_open:
             for symbol in closeableStocks:
