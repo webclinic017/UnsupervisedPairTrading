@@ -64,6 +64,7 @@ class MACDManager(Base, metaclass=Singleton):
         openedPositionSums:float = sum([abs(float(p.cost_basis)) for p in openedPositions.values()])
         
         stockCandidates:list = self._getEnterableEquities(openedPositions)       
+        logger.info(f"enterable stocks: {stockCandidates}")
         availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent - openedPositionSums
         logger.info(f"available cash: ${round(availableCash, 2)}")
         
