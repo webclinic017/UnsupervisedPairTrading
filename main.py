@@ -49,13 +49,6 @@ if __name__ == "__main__":
     cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
     pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
     
-    # update viable pairs
-    logger.info("getting latest pairs")
-    trainedPairs = getPairsFromTrainingJson()
-    trainDate:date = datetime.strptime(trainedPairs["time"], "%Y-%m-%d").date()
-    newPairs:dict = pairCreator.getFinalPairs(trainDate)
-    writeToJson(newPairs, "saveddata/pairs/pairs.json")
-    
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, config.ENTRYPERCENT)
     
@@ -73,6 +66,13 @@ if __name__ == "__main__":
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens            
 
     logger.info("the market is currently open")
+    
+    # update viable pairs
+    logger.info("getting latest pairs")
+    trainedPairs = getPairsFromTrainingJson()
+    trainDate:date = datetime.strptime(trainedPairs["time"], "%Y-%m-%d").date()
+    newPairs:dict = pairCreator.getFinalPairs(trainDate)
+    writeToJson(newPairs, "saveddata/pairs/pairs.json")
            
         
     # start trading
