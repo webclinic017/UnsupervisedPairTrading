@@ -54,7 +54,7 @@ class MACDManager(Base, metaclass=Singleton):
         start = time.perf_counter()
         equities = list(Series({stock:self.signalcatcher.getATR(stock) for stock in self.candidates if stock not in openedPositions.keys() and 
                     self.signalcatcher.canOpen(stock)}).sort_index(ascending=False).index)
-        logger.info(f"retrieval complete. time taken: {round(time.perf_counter() - start, 2)} minutes")
+        logger.info(f"retrieval complete. time taken: {round((time.perf_counter() - start)/60, 2)} minutes")
             
         return equities
     
