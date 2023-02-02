@@ -20,7 +20,7 @@ parser.add_argument("--live_or_paper", help="choose whether to trade on live or 
 args = parser.parse_args()
 
 config:Config = configLoader(configType=CONFIG_TYPE.MACD_TRADING)
-config.IS_PAPER = (args.live_or_paper.strip().lower() == "paper") 
+config.IS_PAPER = (args.live_or_paper.strip().lower() != "live") 
 print(config)
 
 alpacaAuth:AlpacaAuth = getAuth("alpaca_side", config.IS_PAPER)
