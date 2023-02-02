@@ -13,8 +13,14 @@ from dateutil.relativedelta import relativedelta
 import time
 import sys
 from tqdm import tqdm
+import argparse 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--live_or_paper", help="choose whether to trade on live or paper account")
+args = parser.parse_args()
 
 config:Config = configLoader(configType=CONFIG_TYPE.MACD_TRADING)
+config.IS_PAPER = (args.live_or_paper.strip().lower() == "paper") 
 print(config)
 
 alpacaAuth:AlpacaAuth = getAuth("alpaca_side", config.IS_PAPER)

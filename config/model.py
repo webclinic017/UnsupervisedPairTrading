@@ -6,7 +6,7 @@ class CONFIG_TYPE(Enum):
     PAIR_TRADING = "pair_trading"
     MACD_TRADING = "macd_trading"
 
-@dataclass(frozen=True) 
+@dataclass 
 class Config:
     ENTRYPERCENT: float 
     REFRESH_DATA: bool 
