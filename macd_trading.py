@@ -49,7 +49,7 @@ if __name__ == "__main__":
         
         
     # wait till 10 minutes before the market closes
-    secondsLeft:int = int((manager.tradingClient.clock.next_close.replace(tzinfo=None) - relativedelta(minutes=15) -
+    secondsLeft:int = int((manager.tradingClient.clock.next_close.replace(tzinfo=None) - relativedelta(minutes=10) -
                        manager.tradingClient.clock.timestamp.replace(tzinfo=None)).total_seconds())
     logger.info(f"{round(secondsLeft/3600, 2)} hours left before the bot can start operating")   
     for _ in tqdm(range(secondsLeft), desc="waiting till the bot can act ..."):
