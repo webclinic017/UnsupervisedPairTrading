@@ -1,5 +1,5 @@
 from MACDTrading.signalcatcher import SignalCatcher
-from MACDTrading.etfs import ETFs, ETF_TYPES
+from MACDTrading.etfs import ETFs
 from lib.dataEngine import AlpacaDataClient
 from lib.tradingClient import AlpacaTradingClient
 from lib.patterns import Base, Singleton
@@ -31,23 +31,7 @@ class MACDManager(Base, metaclass=Singleton):
             tradingClient=tradingClient,
             entryPercent=entryPercent
         )
-        
-    
-    def _getEnterableETFs(self, openedPositions:dict[str, Position]) -> list:
-        
-        leveragedOptions:list = self.candidates["leveraged"][ETF_TYPES.OPTIONS]
-        leveragedNonOptions:list = self.candidates["leveraged"][ETF_TYPES.NON_OPTIONS]
-        unleveragedOptions:list = self.candidates["unleveraged"][ETF_TYPES.OPTIONS]
-        unleveragedNonOptions:list = self.candidates["unleveraged"][ETF_TYPES.NON_OPTIONS]
-        
-        candidates:list = leveragedOptions + leveragedNonOptions + unleveragedOptions + unleveragedNonOptions                     
-        candidates:list = [stock for stock in candidates if stock not in openedPositions.keys() and \
-                            self.signalcatcher.canOpen(stock)]
-        
-        if len(candidates) > 5 - len(openedPositions):
-            candidates = candidates[:5]
-            
-        return candidates
+
     
     def _getEnterableEquities(self, openedPositions:dict[str, Position]) -> list:
         logger.info("start retrieving enterable equities ... ")
