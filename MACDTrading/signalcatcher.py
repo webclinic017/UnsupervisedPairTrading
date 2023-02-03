@@ -47,18 +47,21 @@ class SignalCatcher:
         )
         
         return (
-            macdInd.macd().iloc[-1] > 0 and 
-            latestClose > sma31.sma_indicator().iloc[-1] and 
-            (
-                (closePrice - sma31.sma_indicator() < 0).iloc[-3:].any() or
-                (todayMinute < sma31.sma_indicator().iloc[-1]).any() or 
+                macdInd.macd().iloc[-1] > 0 and 
+                latestClose > sma31.sma_indicator().iloc[-1] and 
                 (
-                    latestClose > sma21.sma_indicator().iloc[-1] and 
-                    (closePrice < sma21.sma_indicator()).iloc[-3:].any() and 
-                    not (closePrice < sma31.sma_indicator()).iloc[-3:].any()
-                )
-            ) and
-            latestClose > sma60.sma_indicator().iloc[-1])
+                    (closePrice - sma31.sma_indicator() < 0).iloc[-3:].any() or
+                    (todayMinute < sma31.sma_indicator().iloc[-1]).any() or 
+                    (
+                        latestClose > sma21.sma_indicator().iloc[-1] and 
+                        (closePrice < sma21.sma_indicator()).iloc[-3:].any() and 
+                        not (closePrice < sma31.sma_indicator()).iloc[-3:].any()
+                    )
+                ) and
+                latestClose > sma60.sma_indicator().iloc[-1] and 
+                closePrice.iloc[-2] < sma60.sma_indicator().iloc[-2] and 
+                closePrice.iloc[-3] < sma60.sma_indicator().iloc[-3]
+            )
         
     def canClose(self, symbol:str)-> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
