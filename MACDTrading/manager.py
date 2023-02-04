@@ -33,7 +33,7 @@ class MACDManager(Base, metaclass=Singleton):
         )
 
     
-    def _getEnterableEquities(self, openedPositions:dict[str, Position]) -> list:
+    def _getEnterableEquities(self, openedPositions:dict[str, Position]={}) -> list:
         logger.info("start retrieving enterable equities ... ")
         start = time.perf_counter()
         equities = list(Series({stock:self.signalcatcher.getATR(stock) for stock in self.candidates if stock not in openedPositions.keys() and 

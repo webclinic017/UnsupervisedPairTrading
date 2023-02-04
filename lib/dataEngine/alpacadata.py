@@ -82,6 +82,18 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df
         
+    def getMinutes(self, symbol:str, endDate:datetime = datetime.now(), days:int = 1) -> pd.DataFrame:
+        return self.dataClient.get_stock_bars(
+            StockBarsRequest(
+                symbol_or_symbols=symbol,
+                timeframe=TimeFrame.Minute,
+                adjustment=Adjustment.ALL,
+                feed=DataFeed.SIP,
+                start=endDate - relativedelta(days=days),
+                end=endDate
+            )
+        ).df
+        
     def getLastMinute(self, symbol:str) -> float:
         return self.dataClient.get_stock_latest_bar(
             StockLatestBarRequest(

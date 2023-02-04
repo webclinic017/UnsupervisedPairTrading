@@ -2,6 +2,7 @@ from ta.trend import MACD, SMAIndicator
 from ta.volatility import AverageTrueRange
 from lib.dataEngine import AlpacaDataClient
 from pandas import Series
+from datetime import date 
 
 
 class SignalCatcher:
@@ -27,19 +28,12 @@ class SignalCatcher:
           
     def canOpen(self, symbol:str) -> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
-        latestClose:float = self.client.getLastMinute(symbol)
-        todayMinute:Series = self.client.getHourly(symbol, days=1)["close"]
+        minuteBars = self.client.getMinutes(symbol).loc[symbol]
+        todayOpen:float = minuteBars.loc[date.today().strftime("%Y-%m-%d")].iloc[0]["open"]
+        latestClose:float = minuteBar.iloc[-1]["close"]
         
         macdInd:MACD = MACD(
             close=closePrice
-        )
-        sma31:SMAIndicator = SMAIndicator(
-            close=closePrice, 
-            window=31
-        )
-        sma21:SMAIndicator = SMAIndicator(
-            close=closePrice, 
-            window=21
         )
         sma60:SMAIndicator = SMAIndicator(
             close=closePrice, 
@@ -48,19 +42,10 @@ class SignalCatcher:
         
         return (
                 macdInd.macd().iloc[-1] > 0 and 
-                latestClose > sma31.sma_indicator().iloc[-1] and 
-                (
-                    (closePrice - sma31.sma_indicator() < 0).iloc[-3:].any() or
-                    (todayMinute < sma31.sma_indicator().iloc[-1]).any() or 
-                    (
-                        latestClose > sma21.sma_indicator().iloc[-1] and 
-                        (closePrice < sma21.sma_indicator()).iloc[-3:].any() and 
-                        not (closePrice < sma31.sma_indicator()).iloc[-3:].any()
-                    )
-                ) and
-                latestClose > sma60.sma_indicator().iloc[-1] and 
-                closePrice.iloc[-2] < sma60.sma_indicator().iloc[-2] and 
-                closePrice.iloc[-3] < sma60.sma_indicator().iloc[-3]
+                (macdInd.macd().iloc[-31:-1] > 0).sum() == 0 and
+                latestClose > sma60.sma_indicator().iloc[-1] and  
+                latestClose > todayOpen and 
+                (closePrice < sma60.sma_indicator()).iloc[-2:].any() 
             )
         
     def canClose(self, symbol:str)-> bool:
@@ -71,5 +56,12 @@ class SignalCatcher:
             close=closePrice, 
             window=31
         )
+        sma60:SMAIndicator = SMAIndicator(
+            close=closePrice, 
+            window=60
+        )
         
-        return latestClose < sma31.sma_indicator().iloc[-1]
+        stopLoss:float = sma31.sma_indicator().iloc[-1] if sma31.sma_indicator().iloc[-1] > sma60.sma_indicator().iloc[-1] else \
+            sma60.sma_indicator().iloc[-1] - (sma60.sma_indicator().iloc[-1] - sma31.sma_indicator().iloc[-1])/4
+        
+        return latestClose < stopLoss
