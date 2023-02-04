@@ -28,40 +28,43 @@ class SignalCatcher:
           
     def canOpen(self, symbol:str) -> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
-        minuteBars = self.client.getMinutes(symbol).loc[symbol]
-        todayOpen:float = minuteBars.loc[date.today().strftime("%Y-%m-%d")].iloc[0]["open"]
-        latestClose:float = minuteBar.iloc[-1]["close"]
+        minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
+        todayOpen:float = minuteBars.iloc[0]["open"]
+        latestClose:float = minuteBars.iloc[-1]["close"]
         
-        macdInd:MACD = MACD(
+        macdInd:Series = MACD(
             close=closePrice
-        )
-        sma60:SMAIndicator = SMAIndicator(
+        ).macd()
+        sma60:Series = SMAIndicator(
             close=closePrice, 
             window=60
-        )
+        ).sma_indicator()
         
         return (
-                macdInd.macd().iloc[-1] > 0 and 
-                (macdInd.macd().iloc[-31:-1] > 0).sum() == 0 and
-                latestClose > sma60.sma_indicator().iloc[-1] and  
+                macdInd.iloc[-1] > 0 and 
+                (macdInd.iloc[-31:-1] > 0).sum() == 0 and
+                latestClose > sma60.iloc[-1] and  
                 latestClose > todayOpen and 
-                (closePrice < sma60.sma_indicator()).iloc[-2:].any() 
+                (closePrice < sma60).iloc[-2:].any() 
             )
         
     def canClose(self, symbol:str)-> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
-        latestClose:float = self.client.getLastMinute(symbol)
+        minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
+        latestClose:float = minuteBars.iloc[-1]["close"]
         
-        sma31:SMAIndicator = SMAIndicator(
+        sma31:Series = SMAIndicator(
             close=closePrice, 
             window=31
-        )
-        sma60:SMAIndicator = SMAIndicator(
+        ).sma_indicator()
+        sma60:Series = SMAIndicator(
             close=closePrice, 
             window=60
-        )
+        ).sma_indicator()
         
-        stopLoss:float = sma31.sma_indicator().iloc[-1] if sma31.sma_indicator().iloc[-1] > sma60.sma_indicator().iloc[-1] else \
-            sma60.sma_indicator().iloc[-1] - (sma60.sma_indicator().iloc[-1] - sma31.sma_indicator().iloc[-1])/4
+        stopLoss:float = sma31.iloc[-1] if sma31.iloc[-1] > sma60.iloc[-1] else \
+            sma60.iloc[-1] - (sma60.iloc[-1] - sma31.iloc[-1])/4
+            
+        stopLoss:float = stopLoss if stopLoss < minuteBars["close"].min() else minuteBars["close"].min()
         
         return latestClose < stopLoss
