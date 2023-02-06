@@ -52,11 +52,6 @@ if __name__ == "__main__":
             time.sleep(300*60 + timeTillMarketOpens)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
-    time.sleep(10 * 60)
-    start = time.perf_counter()
-    print(manager._getEnterableEquities())
-    print(f"time taken: {round((time.perf_counter()-start)/60, 2)}")
-        
         
     # wait till 10 minutes before the market closes
     secondsLeft:int = int((manager.tradingClient.clock.next_close.replace(tzinfo=None) - relativedelta(minutes=12) -
