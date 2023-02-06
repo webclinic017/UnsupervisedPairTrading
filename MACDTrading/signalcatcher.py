@@ -31,7 +31,7 @@ class SignalCatcher:
             closePrice:Series = self.client.getLongDaily(symbol)["close"]
             minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
         except Exception as ex:
-            print(ex)
+            print(f"{symbol}: {ex}")
             return False 
         
         todayOpen:float = minuteBars.iloc[0]["open"]
