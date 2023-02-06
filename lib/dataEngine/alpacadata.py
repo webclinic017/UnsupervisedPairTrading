@@ -89,8 +89,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
                 timeframe=TimeFrame.Minute,
                 adjustment=Adjustment.ALL,
                 feed=DataFeed.SIP,
-                start=endDate - relativedelta(days=days),
-                end=endDate
+                start=endDate - relativedelta(days=days)
             )
         ).df
         

@@ -43,7 +43,7 @@ class MACDManager(Base, metaclass=Singleton):
         return equities
     
     
-    def openPositions(self) -> None:
+    def openPositions(self) -> list:
         openedPositions:dict[str, Position] = self.tradingClient.openedPositions
         openedPositionSums:float = sum([abs(float(p.cost_basis)) for p in openedPositions.values()])
         
@@ -52,21 +52,26 @@ class MACDManager(Base, metaclass=Singleton):
         availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent - openedPositionSums
         logger.info(f"available cash: ${round(availableCash, 2)}")
         
+        res:list = []
+        
         if self.tradingClient.clock.is_open:
             entryNum:int = min(20 - len(openedPositions), len(stockCandidates))
             for i in range(entryNum):
                 order = self.tradingClient.openMACDPosition(stockCandidates[i], availableCash/(20-len(openedPositions)))
                 logger.info(f"{stockCandidates[i]} bought    ----   entered amount: ${round(float(order.notional), 2)}")
+                res.append(stockCandidates[i])
+                
+        return res
             
             
     
-    def _getCloseableStocks(self, openedPositions:dict[str, Position]) -> list:       
-        return [stock for stock in openedPositions.keys() if self.signalcatcher.canClose(stock)]
+    def _getCloseableStocks(self, openedPositions:dict[str, Position], openedToday:list) -> list:       
+        return [stock for stock in openedPositions.keys() if stock not in openedToday and self.signalcatcher.canClose(stock)]
     
     
-    def closePositions(self) -> None:
+    def closePositions(self, openedToday:list=[]) -> None:
         openedPositions:dict[str, Position] = self.tradingClient.openedPositions
-        closeableStocks:list = self._getCloseableStocks(openedPositions)
+        closeableStocks:list = self._getCloseableStocks(openedPositions, openedToday=openedToday)
         
         if self.tradingClient.clock.is_open:
             for symbol in closeableStocks:

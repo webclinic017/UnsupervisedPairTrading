@@ -65,9 +65,11 @@ if __name__ == "__main__":
     for _ in tqdm(range(secondsLeft), desc="waiting till the bot can act ..."):
         time.sleep(1)
     
+    enteredToday:list = []
     
     while manager.tradingClient.clock.is_open:
-        manager.openPositions()
-        manager.closePositions()
+        entered:list = manager.openPositions()
+        enteredToday += entered
+        manager.closePositions(openedToday=enteredToday)
         time.sleep(30)
 
