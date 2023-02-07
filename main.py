@@ -82,9 +82,11 @@ if __name__ == "__main__":
         time.sleep(10)
         closed:bool = manager.closePositions()
         
-        newPairs:dict = pairCreator.getFinalPairs(trainDate)
-        writeToJson(newPairs, "saveddata/pairs/pairs.json")
-        logger.info("new pairs created")
+        clock = manager.tradingClient.clock
+        if (clock.next_close - clock.timestamp).total_seconds() < 900:
+            newPairs:dict = pairCreator.getFinalPairs(trainDate)
+            writeToJson(newPairs, "saveddata/pairs/pairs.json")
+            logger.info("new pairs created")
         print()
         print("========================================================================")
         print()
