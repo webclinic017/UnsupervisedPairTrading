@@ -81,12 +81,12 @@ if __name__ == "__main__":
         manager.openPositions()
         time.sleep(10)
         closed:bool = manager.closePositions()
-        if closed:
-            newPairs:dict = pairCreator.getFinalPairs(trainDate)
-            writeToJson(newPairs, "saveddata/pairs/pairs.json")
-            logger.info("new pairs created")
+        
+        newPairs:dict = pairCreator.getFinalPairs(trainDate)
+        writeToJson(newPairs, "saveddata/pairs/pairs.json")
+        logger.info("new pairs created")
         print()
         print("========================================================================")
         print()
-        time.sleep(60*5) # sleep for 5 minutes
+
         

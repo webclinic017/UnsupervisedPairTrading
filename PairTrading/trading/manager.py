@@ -99,6 +99,10 @@ class TradingManager(Base, metaclass=Singleton):
     
     def openPositions(self) -> None:
         
+        if (self.tradingClient.clock.next_close - self.tradingClient.clock.timestamp).total_seconds() > 900:
+            logger.info("trading window is not currently open...")
+            return 
+        
         currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions
         tradingPairs:dict[tuple, list] = self.pairInfoRetriever.getTradablePairs(
             pairs=self.pairInfoRetriever.trainedPairs, 
@@ -142,6 +146,7 @@ class TradingManager(Base, metaclass=Singleton):
                          
                          
     def _getCloseablePairs(self, currOpenedPositions:dict[str, Position]) -> list[tuple]:
+        clock = self.tradingClient.clock
         res:list[tuple] = []        
         openedPairs:dict[tuple, float] = self.tradingRecord     
         openedPairsPositions:dict[tuple, list] = self.pairInfoRetriever.getCurrentlyOpenedPairs(
@@ -161,7 +166,7 @@ class TradingManager(Base, metaclass=Singleton):
             if currProfit > 0.1 or currProfit < -0.1:
                 res.append(pair)
             else:                 
-                if daysElapsed > 30:
+                if daysElapsed > 30 and (clock.next_close - clock.timestamp).total_seconds() < 900:
                     res.append(pair)
         return res 
     

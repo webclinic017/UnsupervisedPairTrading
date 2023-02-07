@@ -36,6 +36,8 @@ manager:MACDManager = MACDManager.create(
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+print(manager._getEnterableEquities())
+
 
 if __name__ == "__main__":
     openedPositions:dict[str, Position] = tradingClient.openedPositions
