@@ -43,7 +43,7 @@ class SignalCatcher:
         
         return (
                 macdInd.iloc[-1] > 0 and 
-                (macdInd.iloc[-21:-1] > 0).sum() == 0 and
+                (macdInd.iloc[-16:-1] > 0).sum() == 0 and
                 latestClose > sma60.iloc[-1] and  
                 (
                     latestClose > todayOpen or 
