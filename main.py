@@ -85,8 +85,8 @@ if __name__ == "__main__":
             writeToJson(newPairs, "saveddata/pairs/pairs.json")
             logger.info("new pairs created") 
             
-        manager.openPositions()
-        time.sleep(10)
+            manager.openPositions()
+            time.sleep(10)
         closed:bool = manager.closePositions()
         
         
