@@ -7,6 +7,7 @@ from alpaca.trading.models import Position
 import logging
 from pandas import Series
 import time 
+from datetime import date 
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,8 @@ class MACDManager(Base, metaclass=Singleton):
         minuteSymbols = set([a[0] for a in minuteBars.index.tolist()])
         dailySymbols = set([a[0] for a in dailyBars.index.tolist()])
         equities = list(Series({stock:self.signalcatcher.getATR(stock) for stock in self.candidates if stock not in openedPositions.keys() and 
-                    stock in minuteSymbols and stock in dailySymbols and 
+                    stock in minuteSymbols and stock in dailySymbols and date.today().strftime("%Y-%m-%d") in minuteBars.loc[stock].index and 
+                    date.today().strftime("%Y-%m-%d") in dailyBars.loc[stock].index and 
                     self.signalcatcher.canOpen(minuteBars.loc[stock], dailyBars.loc[stock])}).sort_index(ascending=False).index)
         logger.info(f"retrieval complete. time taken: {round((time.perf_counter() - start)/60, 2)} minutes")
             
