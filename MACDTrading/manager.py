@@ -36,8 +36,13 @@ class MACDManager(Base, metaclass=Singleton):
     def _getEnterableEquities(self, openedPositions:dict[str, Position]={}) -> list:
         logger.info("start retrieving enterable equities ... ")
         start = time.perf_counter()
+        minuteBars = self.dataClient.getMinutes(self.candidates)
+        dailyBars = self.dataClient.getLongDaily(self.candidates)
+        minuteSymbols = set([a[0] for a in minuteBars.index.tolist()])
+        dailySymbols = set([a[0] for a in dailyBars.index.tolist()])
         equities = list(Series({stock:self.signalcatcher.getATR(stock) for stock in self.candidates if stock not in openedPositions.keys() and 
-                    self.signalcatcher.canOpen(stock)}).sort_index(ascending=False).index)
+                    stock in minuteSymbols and stock in dailySymbols and 
+                    self.signalcatcher.canOpen(minuteBars.loc[stock], dailyBars.loc[stock])}).sort_index(ascending=False).index)
         logger.info(f"retrieval complete. time taken: {round((time.perf_counter() - start)/60, 2)} minutes")
             
         return equities
