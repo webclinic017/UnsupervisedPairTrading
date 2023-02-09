@@ -50,7 +50,7 @@ class SignalCatcher:
         
         return (
                 macdInd.iloc[-1] > 0 and 
-                (macdInd.iloc[-21:-2] > 0).sum() == 0 and 
+                (macdInd.iloc[-16:-2] > 0).sum() == 0 and 
                 latestClose > sma60.iloc[-1] and  
                 latestClose > todayOpen and 
                 (dailyBars["close"] < sma60).iloc[-2:].any()
