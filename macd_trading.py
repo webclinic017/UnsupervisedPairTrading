@@ -33,6 +33,8 @@ manager:MACDManager = MACDManager.create(
     entryPercent=config.ENTRYPERCENT)
 
 
+
+
 logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,9 @@ if __name__ == "__main__":
             logger.info(f"anomaly... {round(timeTillMarketOpens/60, 2)} minutes before market opens")
             time.sleep(300*60 + timeTillMarketOpens)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
+        
+    time.sleep(10 * 60)
+    print(manager._getEnterableEquities())
         
     
         

@@ -2,7 +2,7 @@ from ta.trend import MACD, SMAIndicator
 from ta.volatility import AverageTrueRange
 from lib.dataEngine import AlpacaDataClient
 from pandas import Series, DataFrame
-from datetime import date 
+from datetime import datetime, date 
 
 from dateutil.relativedelta import relativedelta
 
@@ -32,7 +32,7 @@ class SignalCatcher:
           
         try:
             dailyBars:Series = self.client.getLongDaily(symbol)
-            minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
+            minuteBars = self.client.getMinutes(symbol, endDate=(datetime.today() - relativedelta(days=1))).loc[symbol].loc[(date.today() - relativedelta(days=1)).strftime("%Y-%m-%d")]
         except Exception as ex:
             print(f"{symbol}: {ex}")
             return False 
@@ -53,7 +53,7 @@ class SignalCatcher:
                 (macdInd.iloc[-21:-2] > 0).sum() == 0 and 
                 latestClose > sma60.iloc[-1] and  
                 latestClose > todayOpen and 
-                not (dailyBars["close"] < sma60).iloc[-2]
+                (dailyBars["close"] < sma60).iloc[-2:].any()
             )
         
     def canClose(self, symbol:str)-> bool:
