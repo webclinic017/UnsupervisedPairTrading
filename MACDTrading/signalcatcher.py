@@ -32,7 +32,7 @@ class SignalCatcher:
           
         try:
             dailyBars:Series = self.client.getLongDaily(symbol)
-            minuteBars = self.client.getMinutes(symbol, endDate=(datetime.today() - relativedelta(days=1))).loc[symbol].loc[(date.today() - relativedelta(days=1)).strftime("%Y-%m-%d")]
+            minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
         except Exception as ex:
             print(f"{symbol}: {ex}")
             return False 
