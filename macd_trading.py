@@ -55,8 +55,6 @@ if __name__ == "__main__":
             time.sleep(300*60 + timeTillMarketOpens)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
-    time.sleep(10 * 60)
-    print(manager._getEnterableEquities())
         
     
         
