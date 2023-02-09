@@ -15,6 +15,9 @@ import sys
 from tqdm import tqdm
 import argparse 
 
+logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--live_or_paper", help="choose whether to trade on live or paper account")
 args = parser.parse_args()
@@ -34,12 +37,6 @@ manager:MACDManager = MACDManager.create(
 
 
 
-
-logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-
 if __name__ == "__main__":
     openedPositions:dict[str, Position] = tradingClient.openedPositions
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
@@ -56,7 +53,7 @@ if __name__ == "__main__":
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
         
-    print(manager._getEnterableEquities())
+    
         
     
         

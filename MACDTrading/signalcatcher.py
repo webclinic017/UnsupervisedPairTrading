@@ -43,17 +43,11 @@ class SignalCatcher:
         macdInd:Series = MACD(
             close=dailyBars["close"]
         ).macd()
-        sma45:Series = SMAIndicator(
-            close=dailyBars["close"], 
-            window=45
-        ).sma_indicator()
         
         return (
                 macdInd.iloc[-1] > 0 and 
-                (macdInd.iloc[-21:-3] >= 0).sum() == 0 and 
-                latestClose > sma45.iloc[-1] and  
-                latestClose > todayOpen and 
-                (dailyBars["close"] < sma45).iloc[-2:].any()
+                (macdInd.iloc[-21:-1] >= 0).sum() == 0 and 
+                latestClose > todayOpen 
             )
         
     def canClose(self, symbol:str)-> bool:

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def cleanClosedTrades() -> None:    
     closedTrades:dict[str, date] = getRecentlyClosed()
     if not closedTrades:
-        logger.debug("There are no trades that were closed less than 31 days ago")
+        logger.info("There are no trades that were closed less than 31 days ago")
         return 
     today:date = date.today()
     

@@ -17,8 +17,6 @@ import time
 from tqdm import tqdm
 import sys
 
-ENTRY_PERCENT = 0.4
-REFRESH_DATA = False
 
 config = configLoader(CONFIG_TYPE.PAIR_TRADING)
 print(config)
