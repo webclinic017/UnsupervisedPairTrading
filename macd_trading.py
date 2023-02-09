@@ -56,6 +56,8 @@ if __name__ == "__main__":
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
         
+    print(manager._getEnterableEquities())
+        
     
         
     # wait till 10 minutes before the market closes
