@@ -37,6 +37,7 @@ logging.basicConfig(stream=sys.stdout, format="%(asctime)s - %(message)s", level
 logger = logging.getLogger(__name__)
 
 
+
 if __name__ == "__main__":
     openedPositions:dict[str, Position] = tradingClient.openedPositions
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
@@ -52,8 +53,7 @@ if __name__ == "__main__":
             time.sleep(300*60 + timeTillMarketOpens)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
-    time.sleep(10 * 60)
-    print(manager._getEnterableEquities())
+    
         
     # wait till 10 minutes before the market closes
     secondsLeft:int = int((manager.tradingClient.clock.next_close.replace(tzinfo=None) - relativedelta(minutes=15) -

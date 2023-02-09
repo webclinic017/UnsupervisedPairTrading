@@ -4,6 +4,8 @@ from lib.dataEngine import AlpacaDataClient
 from pandas import Series, DataFrame
 from datetime import date 
 
+from dateutil.relativedelta import relativedelta
+
 
 class SignalCatcher:
     
@@ -26,30 +28,32 @@ class SignalCatcher:
         return avr.average_true_range().iloc[-1]
         
           
-    def canOpen(self, minuteBars:DataFrame, dailyCloses:DataFrame) -> bool:
-        
-        
+    def canOpen(self, symbol:str) -> bool:
+          
+        try:
+            dailyBars:Series = self.client.getLongDaily(symbol)
+            minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
+        except Exception as ex:
+            print(f"{symbol}: {ex}")
+            return False 
         
         todayOpen:float = minuteBars.iloc[0]["open"]
         latestClose:float = minuteBars.iloc[-1]["close"]
         
         macdInd:Series = MACD(
-            close=dailyCloses.loc[date.today().strftime("%Y-%m-%d")]["close"]
+            close=dailyBars["close"]
         ).macd()
         sma60:Series = SMAIndicator(
-            close=dailyCloses.loc[date.today().strftime("%Y-%m-%d")]["close"], 
+            close=dailyBars["close"], 
             window=60
         ).sma_indicator()
         
         return (
                 macdInd.iloc[-1] > 0 and 
-                (macdInd.iloc[-16:-1] > 0).sum() == 0 and
+                (macdInd.iloc[-21:-2] > 0).sum() == 0 and 
                 latestClose > sma60.iloc[-1] and  
-                (
-                    latestClose > todayOpen or 
-                    (dailyCloses.iloc[-3:]["close"] > dailyCloses.iloc[-3:]["open"]).any()
-                ) and 
-                (closePrice < sma60).iloc[-3:].any() 
+                latestClose > todayOpen and 
+                not (dailyBars["close"] < sma60).iloc[-2]
             )
         
     def canClose(self, symbol:str)-> bool:
