@@ -36,7 +36,6 @@ manager:MACDManager = MACDManager.create(
     entryPercent=config.ENTRYPERCENT)
 
 
-
 if __name__ == "__main__":
     openedPositions:dict[str, Position] = tradingClient.openedPositions
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  

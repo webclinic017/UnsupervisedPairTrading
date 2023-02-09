@@ -5,6 +5,7 @@ from pandas import Series, DataFrame
 from datetime import datetime, date 
 
 from dateutil.relativedelta import relativedelta
+import copy 
 
 
 class SignalCatcher:
@@ -40,13 +41,18 @@ class SignalCatcher:
         todayOpen:float = minuteBars.iloc[0]["open"]
         latestClose:float = minuteBars.iloc[-1]["close"]
         
-        macdInd:Series = MACD(
+        macdCurr:Series = MACD(
             close=dailyBars["close"]
-        ).macd()
+        ).macd().loc[symbol]
+        
+        macdPrev:Series = copy.deepcopy(macdCurr)
+        while macdPrev.index[-1].date() >= date.today():
+            macdPrev = macdPrev.iloc[:-1]
+        
         
         return (
-                macdInd.iloc[-1] > 0 and 
-                (macdInd.iloc[-21:-1] >= 0).sum() == 0 and 
+                macdCurr.loc[date.today().strftime("%Y-%m-%d")][0] > 0 and 
+                (macdPrev.iloc[-21:] >= 0).sum() == 0 and 
                 latestClose > todayOpen 
             )
         

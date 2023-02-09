@@ -56,9 +56,9 @@ class MACDManager(Base, metaclass=Singleton):
         res:list = []
         
         if self.tradingClient.clock.is_open:
-            entryNum:int = min(20 - len(openedPositions), len(stockCandidates))
+            entryNum:int = min(40 - len(openedPositions), len(stockCandidates))
             for i in range(entryNum):
-                order = self.tradingClient.openMACDPosition(stockCandidates[i], availableCash/(20-len(openedPositions)))
+                order = self.tradingClient.openMACDPosition(stockCandidates[i], availableCash/(40-len(openedPositions)))
                 logger.info(f"{stockCandidates[i]} bought    ----   entered amount: ${round(float(order.notional), 2)}")
                 res.append(stockCandidates[i])
                 
