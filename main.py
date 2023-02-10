@@ -41,6 +41,7 @@ if __name__ == "__main__":
         getTrainAssign(alpacaAuth, eodAuth, config.OVERWRITE_FUNDAMENTALS) 
         # write that the training has been done
         pairsDict["time"] = datetime.today().strftime("%Y-%m-%d")
+        pairsDict["final_pairs"] = {",".join(list(p)):val for p, val in pairs["final_pairs"].items()}
         writeToJson(pairsDict, "saveddata/pairs/pairs.json")
         
     #initialize pair-creator

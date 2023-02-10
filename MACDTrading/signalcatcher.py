@@ -5,6 +5,7 @@ from pandas import Series, DataFrame
 from datetime import datetime, date 
 
 from dateutil.relativedelta import relativedelta
+from alpaca.trading.models import Position, Order
 import copy 
 
 
@@ -56,7 +57,7 @@ class SignalCatcher:
                 latestClose > todayOpen 
             )
         
-    def canClose(self, symbol:str)-> bool:
+    def canClose(self, symbol:str, position:Position, order:Order)-> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
         minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
         latestClose:float = minuteBars.iloc[-1]["close"]
@@ -70,9 +71,13 @@ class SignalCatcher:
             window=60
         ).sma_indicator()
         
+        profitPercent:float = float(position.unrealized_plpc)
+        daysElapsed = (date.today() - order.submitted_at.date()).days
+        
         stopLoss:float = sma31.iloc[-1] if sma31.iloc[-1] > sma60.iloc[-1] else \
             sma60.iloc[-1] - (sma60.iloc[-1] - sma31.iloc[-1])/4
             
         stopLoss:float = stopLoss if stopLoss < minuteBars["close"].min() else minuteBars["close"].min()
         
-        return latestClose < stopLoss
+        return (latestClose < stopLoss) or (daysElapsed <= 3 and profitPercent >= 0.15) or \
+            (daysElapsed <= 10 and profitPercent >= 0.3) or (daysElapsed <= 20 and profitPercent >= 0.4)

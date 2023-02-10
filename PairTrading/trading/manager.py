@@ -156,7 +156,7 @@ class TradingManager(Base, metaclass=Singleton):
         for pair, positions in openedPairsPositions.items():
             
             currProfit:float = (float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)) / 2
-            ordersList:list[Order] = self.tradingClient.getPairOrders(pair)
+            ordersList:list[Order] = self.tradingClient.getOrders(pair)
             daysElapsed:int = (date.today() - ordersList[0].submitted_at.date()).days
             logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}")
             if currProfit > 0.1 or currProfit < -0.1:

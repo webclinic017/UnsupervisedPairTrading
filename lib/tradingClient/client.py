@@ -76,12 +76,12 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         res:dict[str, Position] = {position.symbol:position for position in openPositions}
         return res
     
-    def getPairOrders(self, pairSymbols:tuple) -> list[Order]:
-        self.client.get
+    def getOrders(self, symbols:tuple) -> list[Order]:
+        
         return self.client.get_orders(
             GetOrdersRequest(
                 status="closed",
-                symbols=list(pairSymbols)
+                symbols=list(symbols)
             )
         )
         

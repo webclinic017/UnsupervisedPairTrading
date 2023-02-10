@@ -3,7 +3,7 @@ from MACDTrading.etfs import ETFs
 from lib.dataEngine import AlpacaDataClient
 from lib.tradingClient import AlpacaTradingClient
 from lib.patterns import Base, Singleton
-from alpaca.trading.models import Position
+from alpaca.trading.models import Position, Order
 import logging
 from pandas import Series
 import time 
@@ -66,8 +66,12 @@ class MACDManager(Base, metaclass=Singleton):
             
             
     
-    def _getCloseableStocks(self, openedPositions:dict[str, Position], openedToday:list) -> list:       
-        return [stock for stock in openedPositions.keys() if stock not in openedToday and self.signalcatcher.canClose(stock)]
+    def _getCloseableStocks(self, openedPositions:dict[str, Position], openedToday:list) -> list:    
+        orderList:list = self.tradingClient.getOrders(tuple(openedPositions.keys()))   
+        orderDict:dict[str, Order] = {order["symbol"]:order for order in orderList}
+        
+        return [stock for stock in openedPositions.keys() if stock not in openedToday 
+                and self.signalcatcher.canClose(stock, openedPositions[stock], orderDict[stock]) ]
     
     
     def closePositions(self, openedToday:list=[]) -> None:
