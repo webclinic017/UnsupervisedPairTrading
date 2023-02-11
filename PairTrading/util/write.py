@@ -1,5 +1,6 @@
 import json 
 from datetime import datetime, date
+from PairTrading.util.conversion import serializePairData
 import logging 
 
 logger = logging.getLogger(__name__)
@@ -17,10 +18,7 @@ def writeToJson(data:dict, filePath:str) -> bool:
         return False
         
 def dumpTradingRecord(record:dict[tuple, float]) -> None:
-    res:dict[str, float] = {}
-    for pair, zscore in record.items():
-        res[",".join([pair[0], pair[1]])] = zscore
-        
+    res:dict[str, float] = serializePairData(record)
     writeToJson(res, "saveddata/openedpairs.json")
     
 def dumpRecentlyClosed(recentlyClosed:dict[str, date]) -> None:

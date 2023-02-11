@@ -3,6 +3,8 @@ from datetime import datetime, date
 import logging
 import os
 
+from PairTrading.util.conversion import deserializePairData
+
 
 logger = logging.getLogger(__name__)
 
@@ -28,18 +30,17 @@ def getTradingRecord() -> dict[tuple, float]:
         source:dict[str, float] = readFromJson("saveddata/openedpairs.json")       
         if not source:
             return {}
-        res:dict[tuple, float] = {(pair.split(",")[0], pair.split(",")[1]):zscore
-                                 for pair, zscore in source.items()}
+        res:dict[tuple, float] = deserializePairData(source)
         return res 
     
 def getPairsFromTrainingJson() -> dict:
     if not os.path.exists("saveddata/pairs/pairs.json"):
-        logger.debug("pairs.json file does not exist")
+        logger.info("pairs.json file does not exist")
         return {"time":datetime.today().strftime("%Y-%m-%d")}
 
     pairs:dict = readFromJson("saveddata/pairs/pairs.json")
     if pairs:
-        pairs["final_pairs"]:dict = {(p.split(",")[0], p.split(",")[1]):val for p, val in pairs["final_pairs"].items()}
+        pairs["final_pairs"]:dict = deserializePairData(pairs["final_pairs"])
     else:
         pairs = {"time":datetime.today().strftime("%Y-%m-%d")}
     

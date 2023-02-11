@@ -4,6 +4,7 @@ from lib.dataEngine import AlpacaDataClient
 from authentication.auth import AlpacaAuth, EodAuth
 from authentication.authLoader import getAuth
 from PairTrading.pairs.createpairs import PairCreator
+from PairTrading.util.conversion import serializePairData
 from config.configloader import configLoader
 
 from alpaca.trading.models import Order
@@ -41,7 +42,7 @@ if __name__ == "__main__":
         getTrainAssign(alpacaAuth, eodAuth, config.OVERWRITE_FUNDAMENTALS) 
         # write that the training has been done
         pairsDict["time"] = datetime.today().strftime("%Y-%m-%d")
-        pairsDict["final_pairs"] = {",".join(list(p)):val for p, val in pairs["final_pairs"].items()}
+        pairsDict["final_pairs"] = serializePairData(pairsDict["final_pairs"])
         writeToJson(pairsDict, "saveddata/pairs/pairs.json")
         
     #initialize pair-creator
