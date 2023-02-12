@@ -5,12 +5,16 @@ from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
 from lib.dataEngine.common import BarCollection
 from lib.patterns.singleton import Singleton
+from lib.patterns.retry import retry
 from lib.patterns.base import Base
 
 import pandas as pd 
+import logging 
 from datetime import datetime
 from numpy import array
 from dateutil.relativedelta import relativedelta
+
+logger = logging.getLogger(__name__)
 
 class AlpacaDataClient(Base, metaclass=Singleton):
     
@@ -33,6 +37,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             return True 
         return False 
     
+    @retry(max_retries=3, retry_delay=60, logger=logger)
     def getMonthly(self, symbol:str) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
@@ -93,6 +98,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df
         
+    @retry(max_retries=3, retry_delay=60, incremental_backoff=2, logger=logger)
     def getLastMinute(self, symbol:str) -> float:
         return self.dataClient.get_stock_latest_bar(
             StockLatestBarRequest(
