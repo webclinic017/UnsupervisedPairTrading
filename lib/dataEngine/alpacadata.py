@@ -50,6 +50,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df 
         
+    @retry(max_retries=3, retry_delay=60, logger=logger)
     def getWeekly(self, symbol:str) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
@@ -62,6 +63,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         ).df 
         
+    @retry(max_retries=3, retry_delay=60, logger=logger)
     def getDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
@@ -109,9 +111,9 @@ class AlpacaDataClient(Base, metaclass=Singleton):
         
     def getMarketCap(self, symbol:str) -> float:
         df:pd.DataFrame = self.getDaily(symbol)
-        
         return (df["vwap"] * df["volume"]).mean()
         
+    @retry(max_retries=3, retry_delay=60, incremental_backoff=2, logger=logger)
     def getLongDaily(self, symbol:str, endDate:datetime = datetime.today()) -> pd.DataFrame:
         return self.dataClient.get_stock_bars(
             StockBarsRequest(
@@ -128,8 +130,7 @@ class AlpacaDataClient(Base, metaclass=Singleton):
     def getAllBars(self, symbol:str) -> BarCollection:
         daily:pd.DataFrame = self.getDaily(symbol)
         weekly:pd.DataFrame = self.getWeekly(symbol)
-        monthly:pd.DataFrame = self.getMonthly(symbol)
-        
+        monthly:pd.DataFrame = self.getMonthly(symbol)      
         return BarCollection(daily, weekly, monthly)
     
     def getLatestQuote(self, symbol:str) -> Quote:
@@ -140,17 +141,3 @@ class AlpacaDataClient(Base, metaclass=Singleton):
             )
         )[symbol]
         
-    def getAvgSpread(self, symbol:str) -> float:
-        
-        quotes:list = self.dataClient.get_stock_quotes(
-            StockQuotesRequest(
-                symbol_or_symbols=symbol,
-                end=datetime.today(),
-                limit=1000,
-                feed=DataFeed.SIP
-            )
-        )[symbol]
-        
-        spreads = [abs(quote.bid_price-quote.ask_price)/quote.ask_price for quote in quotes if quote.ask_price != 0]
-        
-        return array(spreads).mean()

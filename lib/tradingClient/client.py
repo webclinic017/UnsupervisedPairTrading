@@ -86,41 +86,8 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
             )
         )
         
-        
-    def openMACDPosition(self, symbol:str, entryAmount:float) -> Order:
-        
-        
-        if entryAmount < 0:
-            raise ValueError(f"entry amount: ${round(entryAmount, 2)}  entry amount must be positive")
-        
-        for _ in range(3):
-            try:
-                order:Order = self.client.submit_order(
-                    order_data=MarketOrderRequest(
-                        symbol=symbol,
-                        notional=entryAmount,
-                        side=OrderSide.BUY,
-                        time_in_force=TimeInForce.DAY
-                    )                  
-                )
-                return order
-            except Exception as ex:
-                logger.error(ex)
-                time.sleep(1)
-              
-            
-    def closeMACDPosition(self, symbol:str) -> Order:
-        
-        for _ in range(3):
-            try:
-                order:Order = self.client.close_position(symbol)
-                return order
-            except Exception as ex:
-                logger.error(ex)
-                time.sleep(1)
-
     @retry(max_retries=3, retry_delay=1, incremental_backoff=3, logger=logger)   
-    def submitTrade(self, stockSymbol:str, is_notational:bool, qty:float, side:OrderSide) -> Order:  
+    def _submitTrade(self, stockSymbol:str, is_notational:bool, qty:float, side:OrderSide) -> Order:  
         if is_notational:
             return self.client.submit_order(order_data=MarketOrderRequest(
                     symbol=stockSymbol,
@@ -135,6 +102,28 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
                         side=side,
                         time_in_force=TimeInForce.DAY            
                     ))
+            
+    @retry(max_retries=3, retry_delay=1, incremental_backoff=3, logger=logger)
+    def _closePosition(self, symbol:str) -> Order:
+        return self.client.close_position(symbol)
+        
+        
+    def openMACDPosition(self, symbol:str, entryAmount:float) -> Order:     
+        if entryAmount < 0:
+            raise ValueError(f"entry amount: ${round(entryAmount, 2)}  entry amount must be positive")
+        
+        return self._submitTrade(
+            stockSymbol=symbol, 
+            is_notational=True, 
+            qty=entryAmount, 
+            side=OrderSide.BUY
+            )
+        
+              
+            
+    def closeMACDPosition(self, symbol:str) -> Order:
+        return self._closePosition(symbol)
+    
    
     
     def openArbitragePositions(self, stockPair:tuple, shortQty:float) -> tuple[Order, Order]:
@@ -143,7 +132,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
             raise ValueError(f"{stockPair[0]} - {stockPair[1]}: insufficient shares number forecasted")
         
         # short the first stock
-        shortOrder:Order = self.submitTrade(
+        shortOrder:Order = self._submitTrade(
             stockSymbol=stockPair[0], 
             is_notational=False,
             qty=shortQty, 
@@ -154,7 +143,7 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         longNotional:float = float(filledShortOrder.filled_qty) * float(filledShortOrder.filled_avg_price)
         
         # long the second stock
-        longOrder:Order = self.submitTrade(
+        longOrder:Order = self._submitTrade(
             stockSymbol=stockPair[1], 
             is_notational=True, 
             qty=longNotional, 
@@ -167,9 +156,9 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
     def closeArbitragePositions(self, stockPair:tuple) -> tuple[Order, Order]:
         
         # closed short position
-        closedShortOrder:Order = self.client.close_position(stockPair[0])
+        closedShortOrder:Order = self._closePosition(stockPair[0])
         
         # closed long position
-        closedLongOrder:Order = self.client.close_position(stockPair[1])
+        closedLongOrder:Order = self._closePosition(stockPair[1])
         
         return (closedShortOrder, closedLongOrder)
