@@ -9,6 +9,7 @@ from alpaca.trading.requests import GetAssetsRequest, MarketOrderRequest, GetOrd
 from alpaca.trading.models import Order, Position, TradeAccount, Asset, Clock
 
 from datetime import date, datetime, timezone
+from lib.patterns.retry import retry
 import time
 import logging 
 
@@ -118,7 +119,22 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
                 logger.error(ex)
                 time.sleep(1)
 
-                
+    @retry(max_retries=3, retry_delay=1, incremental_backoff=3, logger=logger)   
+    def submitTrade(self, stockSymbol:str, is_notational:bool, qty:float, side:OrderSide) -> Order:  
+        if is_notational:
+            return self.client.submit_order(order_data=MarketOrderRequest(
+                    symbol=stockSymbol,
+                    notional=qty,
+                    side=side.BUY,
+                    time_in_force=TimeInForce.DAY
+                ))
+        else:            
+            return self.client.submit_order(order_data=MarketOrderRequest(
+                        symbol=stockSymbol,
+                        qty=qty,
+                        side=side,
+                        time_in_force=TimeInForce.DAY            
+                    ))
    
     
     def openArbitragePositions(self, stockPair:tuple, shortQty:float) -> tuple[Order, Order]:
@@ -127,36 +143,23 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
             raise ValueError(f"{stockPair[0]} - {stockPair[1]}: insufficient shares number forecasted")
         
         # short the first stock
-        for i in range(3):
-            try:               
-                shortOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
-                    symbol=stockPair[0],
-                    qty=shortQty,
-                    side=OrderSide.SELL,
-                    time_in_force=TimeInForce.DAY            
-                ))
-            except:
-                time.sleep(1)
-            finally:
-                break
+        shortOrder:Order = self.submitTrade(
+            stockSymbol=stockPair[0], 
+            is_notational=False,
+            qty=shortQty, 
+            side=OrderSide.SELL)
         
         time.sleep(1)
         filledShortOrder:Order = self.client.get_order_by_id(shortOrder.id)
         longNotional:float = float(filledShortOrder.filled_qty) * float(filledShortOrder.filled_avg_price)
         
         # long the second stock
-        for i in range(3):
-            try:
-                longOrder:Order = self.client.submit_order(order_data=MarketOrderRequest(
-                    symbol=stockPair[1],
-                    notional=longNotional,
-                    side=OrderSide.BUY,
-                    time_in_force=TimeInForce.DAY            
-                ))
-            except:
-                time.sleep(1)
-            finally:
-                break
+        longOrder:Order = self.submitTrade(
+            stockSymbol=stockPair[1], 
+            is_notational=True, 
+            qty=longNotional, 
+            side=OrderSide.BUY)
+
         time.sleep(1)
         filledLongOrder:Order = self.client.get_order_by_id(longOrder.id)
         return (filledShortOrder, filledLongOrder)
