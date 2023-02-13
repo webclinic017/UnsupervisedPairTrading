@@ -1,4 +1,4 @@
-. ~/.keychain/$HOSTNAME-sh
+#!/bin/bash
 
 git pull 
 git add saveddata/
