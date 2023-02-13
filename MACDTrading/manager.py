@@ -51,7 +51,7 @@ class MACDManager(Base, metaclass=Singleton):
         tradingAccount:TradeAccount = self.tradingClient.accountDetail
         stockCandidates:list = self._getEnterableEquities(openedPositions)       
         logger.info(f"enterable stocks: {stockCandidates}")
-        availableCash:float = min(float(tradingAccount.non_marginable_buying_power), float(tradingAccount.cash)) * self.entryPercent - openedPositionSums
+        availableCash:float = min(float(tradingAccount.equity), float(tradingAccount.cash)) * self.entryPercent - openedPositionSums
         logger.info(f"available cash: ${round(availableCash, 2)}")
         
         res:list = []

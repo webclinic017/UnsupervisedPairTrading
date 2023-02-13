@@ -110,7 +110,7 @@ class TradingManager(Base, metaclass=Singleton):
        
         tradingAccount:TradeAccount = self.tradingClient.accountDetail
         totalPosition:float = sum([abs(float(p.cost_basis)) for p in currOpenedPositions.values()])
-        availableCash:float = (min(float(tradingAccount.non_marginable_buying_power), float(tradingAccount.cash)) * self.entryPercent - totalPosition) / 2
+        availableCash:float = (min(float(tradingAccount.equity), float(tradingAccount.cash)) * self.entryPercent - totalPosition) / 2
         logger.info(f"available cash: ${round(availableCash, 2)*2}")
         
         tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)          
