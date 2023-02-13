@@ -56,6 +56,7 @@ if __name__ == "__main__":
     
     
     logger.info("start trading ... ")
+    enteredToday:list = []
     clock = manager.tradingClient.clock
     while clock.is_open:
         if (clock.next_close - clock.timestamp).total_seconds() < 20 * 60:
