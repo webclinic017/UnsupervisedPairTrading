@@ -1,3 +1,5 @@
+. ~/.keychain/$HOSTNAME-sh
+
 git pull 
 git add saveddata/
 git commit -m "upload data"
