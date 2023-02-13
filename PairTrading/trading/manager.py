@@ -82,7 +82,7 @@ class TradingManager(Base, metaclass=Singleton):
         else:
             tradingNum:int = len(tradingPairs)
             avgEntryAmount = availableCash / tradingNum
-            while tradingNum > self._getViableTradesNum(avgEntryAmount, tradingPairs) or tradingNum > 20:
+            while tradingNum > self._getViableTradesNum(avgEntryAmount, tradingPairs) or tradingNum > 30:
                 tradingNum -= 1
                 avgEntryAmount = availableCash / tradingNum
                 
