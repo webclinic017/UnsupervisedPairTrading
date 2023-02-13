@@ -13,6 +13,7 @@ def configLoader(configType:CONFIG_TYPE) -> Config:
             ENTRYPERCENT=configDict["entry_percent"],
             REFRESH_DATA=configDict["refresh_data"],
             OVERWRITE_FUNDAMENTALS=configDict["overwrite_fundamentals"],
+            MAXIMUM_POSITIONS=configDict["maximum_positions"],
             IS_PAPER=configDict["is_paper"]
         )
         

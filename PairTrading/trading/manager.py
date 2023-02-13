@@ -21,20 +21,22 @@ logger = logging.getLogger(__name__)
 
 class TradingManager(Base, metaclass=Singleton):
     
-    def __init__(self, tradingClient:AlpacaTradingClient, dataClient:AlpacaDataClient, entryPercent:float):
+    def __init__(self, tradingClient:AlpacaTradingClient, dataClient:AlpacaDataClient, entryPercent:float, maxPositions:int):
         self.tradingClient:AlpacaTradingClient = tradingClient
         self.dataClient:AlpacaDataClient = dataClient
         self.pairInfoRetriever:PairInfoRetriever = PairInfoRetriever.create(tradingClient)
         self.entryPercent:float = entryPercent
+        self.maxPositions:int = maxPositions
         
     @classmethod
-    def create(cls, alpacaAuth:AlpacaAuth, entryPercent:float):
+    def create(cls, alpacaAuth:AlpacaAuth, entryPercent:float, maxPositions:int):
         tradingClient:AlpacaTradingClient = AlpacaTradingClient.create(alpacaAuth)
         dataClient:AlpacaDataClient = AlpacaDataClient.create(alpacaAuth)
         return cls(
             tradingClient=tradingClient,
             dataClient=dataClient,
-            entryPercent=entryPercent
+            entryPercent=entryPercent,
+            maxPositions=maxPositions
         )
         
     @property 
@@ -77,12 +79,14 @@ class TradingManager(Base, metaclass=Singleton):
             tradingNum = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs))
             if not tradingNum and avgEntryAmount * 1.5 < availableCash:
                 avgEntryAmount *= 1.5 
-                tradingNum = min(availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs))
+                tradingNum = min([availableCash//avgEntryAmount, 
+                                 self._getViableTradesNum(avgEntryAmount, tradingPairs), 
+                                 self.maxPositions - len(currOpenedPositions)])
                 
         else:
             tradingNum:int = len(tradingPairs)
             avgEntryAmount = availableCash / tradingNum
-            while tradingNum > self._getViableTradesNum(avgEntryAmount, tradingPairs) or tradingNum > 30:
+            while tradingNum > self._getViableTradesNum(avgEntryAmount, tradingPairs) or tradingNum > self.maxPositions:
                 tradingNum -= 1
                 avgEntryAmount = availableCash / tradingNum
                 
@@ -100,6 +104,7 @@ class TradingManager(Base, metaclass=Singleton):
     def openPositions(self) -> None:
         
         currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions
+        
         tradingPairs:dict[tuple, list] = self.pairInfoRetriever.getTradablePairs(
             pairs=self.pairInfoRetriever.trainedPairs, 
             openedPositions=currOpenedPositions

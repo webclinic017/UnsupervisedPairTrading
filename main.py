@@ -51,7 +51,7 @@ if __name__ == "__main__":
     pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
     
     # initialize trading manager
-    manager = TradingManager.create(alpacaAuth, config.ENTRYPERCENT)
+    manager = TradingManager.create(alpacaAuth, config.ENTRYPERCENT, maxPositions=config.MAXIMUM_POSITIONS)
     
     timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens  
     while not manager.tradingClient.clock.is_open:
