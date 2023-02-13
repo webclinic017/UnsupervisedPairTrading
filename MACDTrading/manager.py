@@ -3,7 +3,7 @@ from MACDTrading.etfs import ETFs
 from lib.dataEngine import AlpacaDataClient
 from lib.tradingClient import AlpacaTradingClient
 from lib.patterns import Base, Singleton
-from alpaca.trading.models import Position, Order
+from alpaca.trading.models import Position, Order, TradeAccount
 import logging
 from pandas import Series
 import time 
@@ -48,9 +48,10 @@ class MACDManager(Base, metaclass=Singleton):
         openedPositions:dict[str, Position] = self.tradingClient.openedPositions
         openedPositionSums:float = sum([abs(float(p.cost_basis)) for p in openedPositions.values()])
         
+        tradingAccount:TradeAccount = self.tradingClient.accountDetail
         stockCandidates:list = self._getEnterableEquities(openedPositions)       
         logger.info(f"enterable stocks: {stockCandidates}")
-        availableCash:float = float(self.tradingClient.accountDetail.equity) * self.entryPercent - openedPositionSums
+        availableCash:float = min(float(tradingAccount.non_marginable_buying_power), float(tradingAccount.cash)) * self.entryPercent - openedPositionSums
         logger.info(f"available cash: ${round(availableCash, 2)}")
         
         res:list = []
