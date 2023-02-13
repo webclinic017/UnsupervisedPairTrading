@@ -59,7 +59,7 @@ if __name__ == "__main__":
     enteredToday:list = []
     clock = manager.tradingClient.clock
     while clock.is_open:
-        if (clock.next_close - clock.timestamp).total_seconds() < 20 * 60:
+        if (clock.next_close - clock.timestamp).total_seconds() < 10 * 60:
             entered:list = manager.openPositions()
             enteredToday += entered
         manager.closePositions(openedToday=enteredToday)
