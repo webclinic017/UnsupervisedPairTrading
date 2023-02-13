@@ -6,4 +6,4 @@ def deserializePairData(data:dict[str, float]) -> dict[tuple, float]:
 
 
 def serializePairData(data:dict[tuple, float]) -> dict[str, float]:
-    return {",".join(key[0], key[1]):zscore for key, zscore in data.items()}
+    return {",".join(list(key)):zscore for key, zscore in data.items()}
