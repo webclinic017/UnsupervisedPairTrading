@@ -11,8 +11,8 @@ class Config:
     ENTRYPERCENT: float 
     REFRESH_DATA: bool 
     OVERWRITE_FUNDAMENTALS: bool 
-    MAXIMUM_POSITIONS: int = 20
     IS_PAPER: bool 
+    MAXIMUM_POSITIONS: int = 20
     
     def __repr__(self):
         return str(asdict(self))
