@@ -52,7 +52,7 @@ if __name__ == "__main__":
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
         
-    
+    time.sleep(10 * 60)
     
     
     logger.info("start trading ... ")

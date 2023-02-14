@@ -52,10 +52,6 @@ class FundamentalsData:
         len(rawFile["Financials"]["Balance_Sheet"]["quarterly"].values()) >= 13 and 
         len(rawFile["Financials"]["Cash_Flow"]["quarterly"].values()) >= 13)
         
-    def _readIncomeBalanceCash(self) -> None:
-        self.incomeStatement = self.rawFile["Income_Statement"]["quarterly"]
-        self.balanceSheet = self.rawFile["Balance_Sheet"]["quarterly"]
-        self.cashFlow = self.rawFile["Cash_Flow"]["quarterly"]
         
     
     
