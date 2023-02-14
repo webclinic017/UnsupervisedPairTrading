@@ -42,7 +42,7 @@ if __name__ == "__main__":
     while not manager.tradingClient.clock.is_open:
         if 0 < timeTillMarketOpens <= 3600 * 8:
             logger.info("waiting for market to open")
-            time.sleep(timeTillMarketOpens + 60)
+            time.sleep(timeTillMarketOpens + 60 * 10)
         elif timeTillMarketOpens > 3600 * 8:
             logger.info("market is not open today")
             sys.exit()
@@ -51,8 +51,6 @@ if __name__ == "__main__":
             time.sleep(300*60 + timeTillMarketOpens)
         timeTillMarketOpens:int = manager.tradingClient.secondsTillMarketOpens   
         
-        
-    time.sleep(10 * 60)
     
     
     logger.info("start trading ... ")
