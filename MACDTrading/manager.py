@@ -71,8 +71,9 @@ class MACDManager(Base, metaclass=Singleton):
         orderList:list = self.tradingClient.getOrders(tuple(openedPositions.keys()))   
         orderDict:dict[str, Order] = {order.symbol:order for order in orderList}
         
+        secondsTillClose:int = self.tradingClient.secondsTillMarketCloses
         return [stock for stock in openedPositions.keys() if stock not in openedToday 
-                and self.signalcatcher.canClose(stock, openedPositions[stock], orderDict[stock]) ]
+                and self.signalcatcher.canClose(stock, openedPositions[stock], orderDict[stock], secondsTillClose) ]
     
     
     def closePositions(self, openedToday:list=[]) -> None:

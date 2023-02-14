@@ -57,7 +57,7 @@ class SignalCatcher:
                 latestClose > todayOpen 
             )
         
-    def canClose(self, symbol:str, position:Position, order:Order)-> bool:
+    def canClose(self, symbol:str, position:Position, order:Order, secondsTillMarketClose:int)-> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
         minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
         latestClose:float = minuteBars.iloc[-1]["close"]
@@ -79,5 +79,5 @@ class SignalCatcher:
             
         stopLoss:float = stopLoss if stopLoss < minuteBars["close"].min() else minuteBars["close"].min()
         
-        return (latestClose < stopLoss) or (daysElapsed <= 3 and profitPercent >= 0.15) or \
+        return (latestClose < stopLoss and secondsTillMarketClose < 600) or (daysElapsed <= 3 and profitPercent >= 0.15) or \
             (daysElapsed <= 10 and profitPercent >= 0.3) or (daysElapsed <= 20 and profitPercent >= 0.4)

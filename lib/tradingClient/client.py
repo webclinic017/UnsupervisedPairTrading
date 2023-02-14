@@ -45,6 +45,11 @@ class AlpacaTradingClient(Base, metaclass=Singleton):
         return self.client.get_clock()
     
     @property
+    def secondsTillMarketCloses(self) -> int:
+        clock:Clock = self.clock
+        return (clock.next_close - clock.timestamp).total_seconds()
+    
+    @property
     def secondsTillMarketOpens(self) -> int:
         clock:Clock = self.clock
         
