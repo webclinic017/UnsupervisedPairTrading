@@ -90,7 +90,7 @@ class TradingManager(Base, metaclass=Singleton):
                 tradingNum -= 1
                 avgEntryAmount = availableCash / tradingNum
                 
-            if tradingNum < 10:
+            if tradingNum < 20:
                 logger.warn(f"Too few available pairs enterable ({tradingNum} pairs), aborting entry...")
                 return (0, 0)
         
