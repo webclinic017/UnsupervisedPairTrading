@@ -20,6 +20,38 @@ class SignalCatcher:
             dataClient=dataClient
         )
         
+    def _getFastSma(self, profitPercent:float) -> Series:
+        fastSma:Series = None 
+        
+        if profitPercent < 0.2:
+            fastSma = SMAIndicator(
+            close=closePrice, 
+            window=31
+            ).sma_indicator()
+        elif 0.3 > profitPercent >= 0.2:
+            fastSma = SMAIndicator(
+            close=closePrice, 
+            window=26
+            ).sma_indicator()
+        elif  0.4 > profitPercent >= 0.3:
+            fastSma = SMAIndicator(
+            close=closePrice, 
+            window=21
+            ).sma_indicator()
+        elif 0.5 > profitPercent >= 0.4:
+            fastSma = SMAIndicator(
+            close=closePrice, 
+            window=16
+            ).sma_indicator()
+        elif profit >= 0.5:
+            fastSma = SMAIndicator(
+            close=closePrice, 
+            window=11
+            ).sma_indicator()
+            
+        return fastSma
+        
+        
     def getATR(self, symbol:str) -> float:
         priceDF = self.client.getDaily(symbol)
         avr = AverageTrueRange(
@@ -61,21 +93,19 @@ class SignalCatcher:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
         minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
         latestClose:float = minuteBars.iloc[-1]["close"]
+         
+        profitPercent:float = float(position.unrealized_plpc)
         
-        sma31:Series = SMAIndicator(
-            close=closePrice, 
-            window=31
-        ).sma_indicator()
+        fastSma:Series = self._getFastSma(profitPercent)           
         sma60:Series = SMAIndicator(
             close=closePrice, 
             window=60
         ).sma_indicator()
         
-        profitPercent:float = float(position.unrealized_plpc)
         daysElapsed = (date.today() - order.submitted_at.date()).days
         
-        stopLoss:float = sma31.iloc[-1] if sma31.iloc[-1] > sma60.iloc[-1] else \
-            sma60.iloc[-1] - (sma60.iloc[-1] - sma31.iloc[-1])/4
+        stopLoss:float = fastSma.iloc[-1] if fastSma.iloc[-1] > sma60.iloc[-1] else \
+            sma60.iloc[-1] - (sma60.iloc[-1] - fastSma.iloc[-1])/4
             
         stopLoss:float = stopLoss if stopLoss < minuteBars["close"].min() else minuteBars["close"].min()
         
