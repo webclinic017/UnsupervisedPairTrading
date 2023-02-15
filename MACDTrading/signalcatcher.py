@@ -91,18 +91,12 @@ class SignalCatcher:
         
     def canClose(self, symbol:str, position:Position, order:Order, secondsTillMarketClose:int)-> bool:
         closePrice:Series = self.client.getLongDaily(symbol)["close"]
-        minuteBars = self.client.getMinutes(symbol).loc[symbol].loc[date.today().strftime("%Y-%m-%d")]
-        latestClose:float = minuteBars.iloc[-1]["close"]
-         
+        latestClose:float = self.client.getLastMinute(symbol)    
         profitPercent:float = float(position.unrealized_plpc)
         
-        fastSma:Series = self._getFastSma(profitPercent)           
-        
-        daysElapsed = (date.today() - order.submitted_at.date()).days
-        
-        stopLoss:float = fastSma.iloc[-1] 
-            
-        stopLoss:float = stopLoss if stopLoss < minuteBars["close"].min() else minuteBars["close"].min()
+        fastSma:Series = self._getFastSma(profitPercent)                 
+        daysElapsed = (date.today() - order.submitted_at.date()).days      
+        stopLoss:float = fastSma.iloc[-1]    
         
         return (latestClose < stopLoss and secondsTillMarketClose < 600) or (daysElapsed <= 3 and profitPercent >= 0.15) or \
             (daysElapsed <= 10 and profitPercent >= 0.3) or (daysElapsed <= 20 and profitPercent >= 0.4)
