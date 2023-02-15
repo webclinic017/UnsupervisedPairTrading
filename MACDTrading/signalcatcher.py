@@ -97,15 +97,10 @@ class SignalCatcher:
         profitPercent:float = float(position.unrealized_plpc)
         
         fastSma:Series = self._getFastSma(profitPercent)           
-        sma60:Series = SMAIndicator(
-            close=closePrice, 
-            window=60
-        ).sma_indicator()
         
         daysElapsed = (date.today() - order.submitted_at.date()).days
         
-        stopLoss:float = fastSma.iloc[-1] if fastSma.iloc[-1] > sma60.iloc[-1] else \
-            sma60.iloc[-1] - (sma60.iloc[-1] - fastSma.iloc[-1])/4
+        stopLoss:float = fastSma.iloc[-1] 
             
         stopLoss:float = stopLoss if stopLoss < minuteBars["close"].min() else minuteBars["close"].min()
         
