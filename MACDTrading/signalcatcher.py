@@ -22,7 +22,6 @@ class SignalCatcher:
         
     def _getFastSma(self, profitPercent:float, closePrice:Series) -> Series:
         fastSma:Series = None 
-        latestClose:float = self.client.getLastMinute(symbol)
         
         if profitPercent < 0.2:
             fastSma = SMAIndicator(
