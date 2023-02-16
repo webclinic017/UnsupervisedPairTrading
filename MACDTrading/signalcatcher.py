@@ -20,8 +20,9 @@ class SignalCatcher:
             dataClient=dataClient
         )
         
-    def _getFastSma(self, profitPercent:float) -> Series:
+    def _getFastSma(self, profitPercent:float, closePrice:Series) -> Series:
         fastSma:Series = None 
+        latestClose:float = self.client.getLastMinute(symbol)
         
         if profitPercent < 0.2:
             fastSma = SMAIndicator(
@@ -94,7 +95,7 @@ class SignalCatcher:
         latestClose:float = self.client.getLastMinute(symbol)    
         profitPercent:float = float(position.unrealized_plpc)
         
-        fastSma:Series = self._getFastSma(profitPercent)                 
+        fastSma:Series = self._getFastSma(profitPercent, closePrice)                 
         daysElapsed = (date.today() - order.submitted_at.date()).days      
         stopLoss:float = fastSma.iloc[-1]    
         
