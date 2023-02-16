@@ -61,6 +61,6 @@ if __name__ == "__main__":
             entered:list = manager.openPositions()
             enteredToday += entered
         manager.closePositions(openedToday=enteredToday)
-        time.sleep(30)
+        time.sleep(5)
         clock = manager.tradingClient.clock
 
