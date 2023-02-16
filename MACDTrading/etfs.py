@@ -26,7 +26,7 @@ class ETFs(Base, metaclass=Singleton):
         res = []
         for symbol in tqdm(tradableStocksSymbols, desc="filter for viable stocks"):
             try:
-                if self.dataClient.getMarketCap(symbol) > 1_000_000:
+                if self.dataClient.getMarketCap(symbol) > 5_000_000:
                     res.append(symbol)
             except:
                 continue
