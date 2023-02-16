@@ -76,7 +76,11 @@ class TradingManager(Base, metaclass=Singleton):
                 openedEquities.append(abs(float(position.avg_entry_price) * float(position.qty)))
             openedEquities:np.array = np.array(openedEquities)
             avgEntryAmount:float = (np.sum(openedEquities) + availableCash) // self.maxPositions
-            tradingNum = min([availableCash//avgEntryAmount, self._getViableTradesNum(avgEntryAmount, tradingPairs), self.maxPositions])
+            tradingNum:int = min([
+                availableCash//avgEntryAmount, 
+                self._getViableTradesNum(avgEntryAmount, tradingPairs), 
+                self.maxPositions-len(currOpenedPositions) if self.maxPositions-len(currOpenedPositions) > 0 else 0
+                ])
                 
         else:
             tradingNum:int = len(tradingPairs)
