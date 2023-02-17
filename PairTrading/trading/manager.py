@@ -187,7 +187,7 @@ class TradingManager(Base, metaclass=Singleton):
             recentlyClosed[order1.symbol] = order1.submitted_at.date()
             recentlyClosed[order2.symbol] = order2.submitted_at.date()       
             self.tradingRecord = tradingRecord
-            logger.info(f"recently closed: {recentlyClosed}")
+            logger.info(f"recently closed: {list(recentlyClosed.keys())}")
             self.pairInfoRetriever.recentlyClosedPositions = recentlyClosed      
 
             logger.info(f"closed {pair[0]} <-> {pair[1]} pair position.")
