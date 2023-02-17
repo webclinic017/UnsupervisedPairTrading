@@ -27,6 +27,8 @@ class TradingManager(Base, metaclass=Singleton):
         self.pairInfoRetriever:PairInfoRetriever = PairInfoRetriever.create(tradingClient)
         self.entryPercent:float = entryPercent
         self.maxPositions:int = maxPositions
+        self.openedPositions:dict[str, Position] = self.tradingClient.openedPositions
+        self.lastLogTime:datetime = datetime.now()
         
     @classmethod
     def create(cls, alpacaAuth:AlpacaAuth, entryPercent:float, maxPositions:int):
@@ -102,22 +104,20 @@ class TradingManager(Base, metaclass=Singleton):
     
     def openPositions(self) -> None:
         
-        currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions
-        
         tradingPairs:dict[tuple, list] = self.pairInfoRetriever.getTradablePairs(
             pairs=self.pairInfoRetriever.trainedPairs, 
-            openedPositions=currOpenedPositions
+            openedPositions=self.openedPositions
         )
         if not tradingPairs:
             logger.debug("No trading pairs detected")
             return
        
         tradingAccount:TradeAccount = self.tradingClient.accountDetail
-        totalPosition:float = sum([abs(float(p.cost_basis)) for p in currOpenedPositions.values()])
+        totalPosition:float = sum([abs(float(p.cost_basis)) for p in self.openedPositions.values()])
         availableCash:float = (min(float(tradingAccount.equity), float(tradingAccount.cash)) * self.entryPercent - totalPosition) / 2
         logger.info(f"available cash: ${round(availableCash, 2)*2}")
         
-        tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, currOpenedPositions)          
+        tradeNums, notionalAmount = self._getOptimalTradingNum(tradingPairs, availableCash, self.openedPositions)          
         if tradeNums < 1:
             logger.info("No more trades can be placed currently")
             return 
@@ -139,13 +139,23 @@ class TradingManager(Base, metaclass=Singleton):
                 executedTrades += 1
             except Exception:
                 continue
+            
+        if executedTrades > 0:
+            self.openedPositions = self.tradingClient.openedPositions
         
             
         
+    def _getLatestProfit(self, position:Position, is_short:bool) -> float:        
+        quote:Quote = self.dataClient.getLatestQuote(position.symbol)
+        if is_short:
+            return (float(position.avg_entry_price) - quote.ask_price) / float(position.avg_entry_price)
+        else:
+            return (quote.bid_price - float(position.avg_entry_price)) / float(position.avg_entry_price)
             
                          
                          
     def _getCloseablePairs(self, currOpenedPositions:dict[str, Position]) -> list[tuple]:
+        updateLogTime:bool = (datetime.now() - self.lastLogTime).total_seconds() >= 60
         clock = self.tradingClient.clock
         res:list[tuple] = []        
         openedPairs:dict[tuple, float] = self.tradingRecord     
@@ -159,20 +169,28 @@ class TradingManager(Base, metaclass=Singleton):
         
         for pair, positions in openedPairsPositions.items():
             
-            currProfit:float = (float(positions[0].unrealized_plpc) + float(positions[1].unrealized_plpc)) / 2
+            currProfit:float = (self._getLatestProfit(positions[0], True) + self._getLatestProfit(positions[1], False)) / 2
             ordersList:list[Order] = self.tradingClient.getOrders(pair)
             daysElapsed:int = (date.today() - ordersList[0].submitted_at.date()).days
-            logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}")
+            
+            if updateLogTime:
+                logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}")
+            
             if currProfit > 0.1 or currProfit < -0.1:
                 res.append(pair)
             else:                 
                 if daysElapsed > 30 and (clock.next_close - clock.timestamp).total_seconds() <= 900:
                     res.append(pair)
+                    
+        if updateLogTime:
+            print()
+            print("========================================================================")
+            print()
+        self.lastLogTime:datetime = datetime.now() if updateLogTime else self.lastLogTime
         return res 
     
-    def closePositions(self) -> bool:
-        currOpenedPositions:dict[str, Position] = self.tradingClient.openedPositions          
-        closeablePairs:list[tuple] = self._getCloseablePairs(currOpenedPositions)
+    def closePositions(self) -> bool:        
+        closeablePairs:list[tuple] = self._getCloseablePairs(self.openedPositions)
         
         if not closeablePairs:
             logger.debug("no closeable pairs detected currently")
@@ -181,8 +199,10 @@ class TradingManager(Base, metaclass=Singleton):
         tradingRecord:dict[tuple, float] = self.tradingRecord
         recentlyClosed:dict[str, date] = self.pairInfoRetriever.recentlyClosedPositions
         
+        tradesExecuted:int = 0
         for pair in closeablePairs:
             order1, order2 = self.tradingClient.closeArbitragePositions(pair)
+            tradesExecuted += 1
             del tradingRecord[pair]
             recentlyClosed[order1.symbol] = order1.submitted_at.date()
             recentlyClosed[order2.symbol] = order2.submitted_at.date()       
@@ -192,6 +212,8 @@ class TradingManager(Base, metaclass=Singleton):
 
             logger.info(f"closed {pair[0]} <-> {pair[1]} pair position.")
             
+        if tradesExecuted > 0:
+            self.openedPositions = self.tradingClient.openedPositions
         return True
         
         

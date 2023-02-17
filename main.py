@@ -88,11 +88,6 @@ if __name__ == "__main__":
             manager.openPositions()
             time.sleep(10)
         closed:bool = manager.closePositions()
-        
-        
-        print()
-        print("========================================================================")
-        print()
-        time.sleep(60)
+        time.sleep(1)
 
         
