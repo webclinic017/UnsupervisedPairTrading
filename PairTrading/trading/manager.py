@@ -65,7 +65,7 @@ class TradingManager(Base, metaclass=Singleton):
                 res += 1 
         return res 
     
-    def _getOptimalTradingNum(self, tradingPairs, availableCash:float, currOpenedPositions:dict[str, Position]) -> (int, float):
+    def _getOptimalTradingNum(self, tradingPairs, availableCash:float, openedPositions:dict[str, Position]) -> (int, float):
         if availableCash <= 0:
             return (0, 0)
                
@@ -73,15 +73,15 @@ class TradingManager(Base, metaclass=Singleton):
         tradingNum:int = 0
         avgEntryAmount:float = 0
         
-        if currOpenedPositions:           
-            for stock, position in currOpenedPositions.items():
+        if openedPositions:           
+            for stock, position in openedPositions.items():
                 openedEquities.append(abs(float(position.avg_entry_price) * float(position.qty)))
             openedEquities:np.array = np.array(openedEquities)
             avgEntryAmount:float = (np.sum(openedEquities) + availableCash) // self.maxPositions
             tradingNum:int = min([
                 availableCash//avgEntryAmount, 
                 self._getViableTradesNum(avgEntryAmount, tradingPairs), 
-                self.maxPositions-len(currOpenedPositions) if self.maxPositions-len(currOpenedPositions) > 0 else 0
+                self.maxPositions-len(openedPositions) if self.maxPositions-len(openedPositions) > 0 else 0
                 ])
                 
         else:
@@ -154,14 +154,14 @@ class TradingManager(Base, metaclass=Singleton):
             
                          
                          
-    def _getCloseablePairs(self, currOpenedPositions:dict[str, Position]) -> list[tuple]:
+    def _getCloseablePairs(self, openedPositions:dict[str, Position]) -> list[tuple]:
         updateLogTime:bool = (datetime.now() - self.lastLogTime).total_seconds() >= 60
         clock = self.tradingClient.clock
         res:list[tuple] = []        
         openedPairs:dict[tuple, float] = self.tradingRecord     
         openedPairsPositions:dict[tuple, list] = self.pairInfoRetriever.getCurrentlyOpenedPairs(
             pairs=openedPairs, 
-            openedPositions=currOpenedPositions)     
+            openedPositions=openedPositions)     
         
         if not openedPairsPositions:
             logger.debug("No pairs opened")
