@@ -6,7 +6,7 @@ from lib.patterns import Singleton, Base
 from PairTrading.trading.helper import PairInfoRetriever
 from authentication.auth import AlpacaAuth
 
-from alpaca.trading.models import TradeAccount, Position, Order
+from alpaca.trading.models import TradeAccount, Position, Order, Clock
 from alpaca.data.models import Quote
 
 
@@ -28,7 +28,7 @@ class TradingManager(Base, metaclass=Singleton):
         self.entryPercent:float = entryPercent
         self.maxPositions:int = maxPositions
         self.openedPositions:dict[str, Position] = self.tradingClient.openedPositions
-        self.lastLogTime:datetime = datetime.now()
+        self.clock:Clock = self.tradingClient.clock
         
     @classmethod
     def create(cls, alpacaAuth:AlpacaAuth, entryPercent:float, maxPositions:int):
@@ -155,8 +155,7 @@ class TradingManager(Base, metaclass=Singleton):
                          
                          
     def _getCloseablePairs(self, openedPositions:dict[str, Position]) -> list[tuple]:
-        updateLogTime:bool = (datetime.now() - self.lastLogTime).total_seconds() >= 60
-        clock = self.tradingClient.clock
+        updateLogTime:bool = (datetime.now() - self.clock.timestamp).total_seconds() >= 60
         res:list[tuple] = []        
         openedPairs:dict[tuple, float] = self.tradingRecord     
         openedPairsPositions:dict[tuple, list] = self.pairInfoRetriever.getCurrentlyOpenedPairs(
@@ -179,14 +178,14 @@ class TradingManager(Base, metaclass=Singleton):
             if currProfit > 0.1 or currProfit < -0.1:
                 res.append(pair)
             else:                 
-                if daysElapsed > 30 and (clock.next_close - clock.timestamp).total_seconds() <= 900:
+                if daysElapsed > 30 and (self.clock.next_close - self.clock.timestamp).total_seconds() <= 900:
                     res.append(pair)
                     
         if updateLogTime:
             print()
             print("========================================================================")
             print()
-        self.lastLogTime:datetime = datetime.now() if updateLogTime else self.lastLogTime
+        self.clock:Clock = self.tradingClient.clock if updateLogTime else self.clock
         return res 
     
     def closePositions(self) -> bool:        
