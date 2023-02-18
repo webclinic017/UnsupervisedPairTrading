@@ -160,7 +160,8 @@ class TradingManager(Base, metaclass=Singleton):
         openedPairs:dict[tuple, float] = self.tradingRecord     
         openedPairsPositions:dict[tuple, list] = self.pairInfoRetriever.getCurrentlyOpenedPairs(
             pairs=openedPairs, 
-            openedPositions=openedPositions)     
+            openedPositions=openedPositions)    
+        tradingRecord:dict[tuple, float] = self.tradingRecord 
         
         if not openedPairsPositions:
             logger.debug("No pairs opened")
@@ -173,12 +174,12 @@ class TradingManager(Base, metaclass=Singleton):
             daysElapsed:int = (date.today() - ordersList[0].submitted_at.date()).days
             
             if updateLogTime:
-                logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}")
+                logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}, hypothetical exit profit: {round(tradingRecord[pair]*100, 2)}%")
             
-            if currProfit > 0.1 or currProfit < -0.1:
+            if currProfit > tradingRecord[pair] or currProfit < -tradingRecord[pair]:
                 res.append(pair)
             else:                 
-                if daysElapsed > 30 and (self.clock.next_close - self.clock.timestamp).total_seconds() <= 900:
+                if daysElapsed > 30 and (self.clock.next_close - self.clock.timestamp).total_seconds() <= 600:
                     res.append(pair)
                     
         if updateLogTime:

@@ -1,4 +1,4 @@
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, concat
 from numpy import array, dot
 from sklearn.preprocessing import StandardScaler
 from datetime import date, datetime
@@ -32,7 +32,7 @@ class PairCreator(Base, metaclass=Singleton):
         
         tmpDict:dict = {}
         for pair in viablePairs:           
-            tmpDict[",".join(pair)] = pairsDF.loc[",".join(pair)]["momentum_zscore"]
+            tmpDict[",".join(pair)] = pairsDF.loc[",".join(pair)]["momentum"] * 1.5 / pairsDF.loc[",".join(pair)]["momentum_zscore"]
                 
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]
@@ -46,7 +46,9 @@ class PairCreator(Base, metaclass=Singleton):
         pairData:array = array(pairCandidates).reshape(-1, 1)
         
         sc = StandardScaler()
-        pairsDF:DataFrame = DataFrame(sc.fit_transform(pairData), index=pairCandidates.index, columns=["momentum_zscore"])     
+        pairsDF:DataFrame = concat({
+            "momentum_zscore": Series(sc.fit_transform(pairData).flatten(), index=pairCandidates.index), 
+            "momentum": pairCandidates}, axis=1)  
         
         return pairsDF.loc[pairsDF["momentum_zscore"] > 1].sort_values(by=["momentum_zscore"], ascending=False)
                       
