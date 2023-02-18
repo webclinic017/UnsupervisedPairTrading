@@ -12,7 +12,7 @@ def retry(max_retries=3, retry_delay=1, incremental_backoff=2, logger=None):
                 except Exception as e:
                     retries += 1
                     if retries >= max_retries:
-                        raise 
+                        raise(e)
                     if logger:
                         logger.warning(f"Retryable error caught: {e}. Retrying...")
                     time.sleep(retry_delay)

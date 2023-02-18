@@ -884,6 +884,27 @@ class FirmCharGetter(FundamentalsBase):
         
         return currMom - prevMom
     
+    def getMom6m(self) -> float:
+        """
+            mom6m:
+            5-month cumulative returns ending one month before month end
+        """
+        return (self.monthlyBar.iloc[-1]["close"] - self.monthlyBar.iloc[-16]["close"]) / self.monthlyBar.iloc[-16]["close"]
+    
+    def getMom12m(self) -> float:
+        """
+            mom12m:
+            11-month cumulative returns ending one month before month end
+        """
+        return (self.monthlyBar.iloc[-1]["close"] - self.monthlyBar.iloc[-12]["close"]) / self.monthlyBar.iloc[-12]["close"]
+    
+    def getMom36m(self) -> float:
+        """
+            mom36m:
+            Cumulative returns from months t-36 to t-13
+        """
+        return (self.monthlyBar.iloc[-13]["close"] - self.monthlyBar.iloc[-36]["close"]) / self.monthlyBar.iloc[-36]["close"]
+    
     def getTb(self) -> float:
         """
             tb -- Tax income to book income:

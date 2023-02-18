@@ -30,9 +30,13 @@ class PairCreator(Base, metaclass=Singleton):
         pairsDF:DataFrame = self._getTradeablePairs()
         viablePairs:list = [(val.split(",")[0], val.split(",")[1]) for val in pairsDF.index]
         
+        meanMomentum:float = pairsDF["momentum"].mean()
+        
         tmpDict:dict = {}
         for pair in viablePairs:           
-            tmpDict[",".join(pair)] = pairsDF.loc[",".join(pair)]["momentum"] * 1.5 / pairsDF.loc[",".join(pair)]["momentum_zscore"]
+            tmpDict[",".join(pair)] = (pairsDF.loc[",".join(pair)]["momentum"] - pairsDF.loc[",".join(pair)]["mean"]) * 2 / \
+                pairsDF.loc[",".join(pair)]["momentum_zscore"]
+
                 
         for pair in list(tmpDict.keys()):
             finalPairs[pair] = tmpDict[pair]
@@ -48,7 +52,8 @@ class PairCreator(Base, metaclass=Singleton):
         sc = StandardScaler()
         pairsDF:DataFrame = concat({
             "momentum_zscore": Series(sc.fit_transform(pairData).flatten(), index=pairCandidates.index), 
-            "momentum": pairCandidates}, axis=1)  
+            "momentum": pairCandidates, 
+            "mean": Series(sc.mean_[0], index=pairCandidates.index)}, axis=1)  
         
         return pairsDF.loc[pairsDF["momentum_zscore"] > 1].sort_values(by=["momentum_zscore"], ascending=False)
                       
@@ -69,6 +74,6 @@ class PairCreator(Base, metaclass=Singleton):
     def _getMomentum(self) -> None:
         for stock in tqdm(self.clusterDF.index, desc="get latest momentum data"):
             currPrice:float = self.dataClient.getLastMinute(stock)
-            prevPrice:float = self.dataClient.getMonthly(stock).iloc[-2]["close"]            
+            prevPrice:float = self.dataClient.getMonthly(stock, 2).iloc[-2]["close"]            
             self.clusterDF.loc[stock]["momentum"] = (currPrice - prevPrice) / prevPrice
     
