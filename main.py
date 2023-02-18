@@ -50,8 +50,6 @@ if __name__ == "__main__":
     cluster:DataFrame = read_csv("saveddata/cluster.csv", index_col=0)
     pairCreator:PairCreator = PairCreator.create(cluster, AlpacaDataClient.create(alpacaAuth))
     
-    print(pairCreator.getFinalPairs(date.today()))
-    
     # initialize trading manager
     manager = TradingManager.create(alpacaAuth, config.ENTRYPERCENT, maxPositions=config.MAXIMUM_POSITIONS)
     
