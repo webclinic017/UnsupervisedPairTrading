@@ -174,7 +174,9 @@ class TradingManager(Base, metaclass=Singleton):
             daysElapsed:int = (date.today() - ordersList[0].submitted_at.date()).days
             
             if updateLogTime:
-                logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}, hypothetical exit profit: {round(tradingRecord[pair]*100, 2)}%")
+                logger.info(
+                    f"{pair[0]}--{pair[1]}, profit: {round(currProfit*100, 2)}%, days: {daysElapsed}, exit_profit: {round(tradingRecord[pair]*100, 2)}%"
+                    )
             
             if currProfit > 0.1 or currProfit < -0.1:
                 res.append(pair)
