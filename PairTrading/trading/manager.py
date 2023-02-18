@@ -109,7 +109,7 @@ class TradingManager(Base, metaclass=Singleton):
             openedPositions=self.openedPositions
         )
         if not tradingPairs:
-            logger.debug("No trading pairs detected")
+            logger.info("No trading pairs detected")
             return
        
         tradingAccount:TradeAccount = self.tradingClient.accountDetail
@@ -164,7 +164,7 @@ class TradingManager(Base, metaclass=Singleton):
         tradingRecord:dict[tuple, float] = self.tradingRecord 
         
         if not openedPairsPositions:
-            logger.debug("No pairs opened")
+            logger.info("No pairs opened")
             return
         
         for pair, positions in openedPairsPositions.items():
@@ -195,7 +195,7 @@ class TradingManager(Base, metaclass=Singleton):
         closeablePairs:list[tuple] = self._getCloseablePairs(self.openedPositions)
         
         if not closeablePairs:
-            logger.debug("no closeable pairs detected currently")
+            logger.info("no closeable pairs detected currently ...")
             return False
         
         tradingRecord:dict[tuple, float] = self.tradingRecord
