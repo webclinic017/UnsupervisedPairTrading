@@ -155,7 +155,7 @@ class TradingManager(Base, metaclass=Singleton):
                          
                          
     def _getCloseablePairs(self, openedPositions:dict[str, Position]) -> list[tuple]:
-        updateLogTime:bool = (datetime.now() - self.clock.timestamp).total_seconds() >= 60
+        updateLogTime:bool = (datetime.now() - self.clock.timestamp.replace(tzinfo=None)).total_seconds() >= 60
         res:list[tuple] = []        
         openedPairs:dict[tuple, float] = self.tradingRecord     
         openedPairsPositions:dict[tuple, list] = self.pairInfoRetriever.getCurrentlyOpenedPairs(
@@ -176,7 +176,7 @@ class TradingManager(Base, metaclass=Singleton):
             if updateLogTime:
                 logger.info(f"{pair[0]}--{pair[1]}, curr_profit: {round(currProfit*100, 2)}%, days_elapsed: {daysElapsed}, hypothetical exit profit: {round(tradingRecord[pair]*100, 2)}%")
             
-            if currProfit > tradingRecord[pair] or currProfit < -tradingRecord[pair]:
+            if currProfit > 0.1 or currProfit < -0.1:
                 res.append(pair)
             else:                 
                 if daysElapsed > 30 and (self.clock.next_close - self.clock.timestamp).total_seconds() <= 600:
