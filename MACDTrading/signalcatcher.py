@@ -85,7 +85,7 @@ class SignalCatcher:
         
         return (
                 macdCurr.loc[date.today().strftime("%Y-%m-%d")][0] > 0 and 
-                (macdPrev.iloc[-21:] >= 0).sum() == 0 and 
+                (macdPrev.iloc[-31:] >= 0).sum() == 0 and 
                 latestClose > todayOpen 
             )
         
