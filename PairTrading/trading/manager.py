@@ -104,6 +104,10 @@ class TradingManager(Base, metaclass=Singleton):
     
     def openPositions(self) -> None:
         
+        if len(self.openedPositions) >= self.maxPositions:
+            logger.info(f"portfolio has reached maximum {self.maxPositions} positions ...")
+            return 
+        
         tradingPairs:dict[tuple, list] = self.pairInfoRetriever.getTradablePairs(
             pairs=self.pairInfoRetriever.trainedPairs, 
             openedPositions=self.openedPositions
